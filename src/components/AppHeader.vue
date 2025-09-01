@@ -113,11 +113,9 @@
                 @click="handleSignIn"
                 :disabled="pokemonStore.isLoading"
                 class="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                :title="!import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID ? 'Google OAuth not configured' : 'Google services unavailable'"
+                :title="oAuthTooltip"
               >
-                <span v-if="pokemonStore.isLoading">Signing in...</span>
-                <span v-else-if="!import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID">Sign in (Config Missing)</span>
-                <span v-else>Sign in (Demo)</span>
+                {{ signInButtonText }}
               </button>
             </div>
 
@@ -170,6 +168,17 @@ const selectedGeneration = ref('')
 // Google sign-in button
 const googleSigninButton = ref<HTMLElement>()
 const isGoogleAvailable = ref(false)
+
+// OAuth configuration computed properties
+const hasOAuthClientId = computed(() => !!import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID)
+const oAuthTooltip = computed(() => 
+  !hasOAuthClientId.value ? 'Google OAuth not configured' : 'Google services unavailable'
+)
+const signInButtonText = computed(() => {
+  if (pokemonStore.isLoading) return 'Signing in...'
+  if (!hasOAuthClientId.value) return 'Sign in (Config Missing)'
+  return 'Sign in (Demo)'
+})
 
 // Google Auth handlers
 const handleSignIn = async () => {
