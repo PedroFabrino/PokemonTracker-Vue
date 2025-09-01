@@ -856,7 +856,6 @@ export function usePokemonServices() {
     loadSampleData,
     refreshFromSheets,
     refreshPokemonCache,
-    debugSyncState,
-    fixOnlineMode
+    debugSyncState
   }
 }
