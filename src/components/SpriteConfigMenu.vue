@@ -122,7 +122,12 @@ const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   // Fallback to official artwork if current style fails
   if (previewPokemon.value) {
-    img.src = previewPokemon.value.sprites.other['official-artwork'].front_default
+    const fallbackUrl = previewPokemon.value.sprites.other?.['official-artwork']?.front_default || 
+                       previewPokemon.value.sprites.front_default ||
+                       ''
+    if (fallbackUrl) {
+      img.src = fallbackUrl
+    }
   }
 }
 
