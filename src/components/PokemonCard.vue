@@ -151,20 +151,31 @@ const generationInfo = computed(() =>
 
 // Methods
 const toggleCollection = async () => {
-  if (props.isFilteredOut) return
+  if (props.isFilteredOut) {
+    return
+  }
 
+  console.log(`🎯 Pokemon #${props.pokemon.id} clicked - Online mode: ${isOnlineMode.value}`)
   isLoading.value = true
   
   try {
     // Create sync callback if online
     const syncCallback = isOnlineMode.value 
       ? async (id: number, isCollected: boolean) => {
+          console.log(`📤 Syncing Pokemon #${id} to Google Sheets...`)
           const result = await syncPokemonToSheets(id, isCollected)
+          
           if (!result.success) {
-            console.warn(`Failed to sync Pokemon #${id}:`, result.error)
+            console.warn(`❌ Sync failed for Pokemon #${id}:`, result.error)
+          } else {
+            console.log(`✅ Sync successful for Pokemon #${id}`)
           }
         }
       : undefined
+
+    if (!syncCallback) {
+      console.log(`📴 No sync - offline mode for Pokemon #${props.pokemon.id}`)
+    }
 
     await pokemonStore.togglePokemonCollected(props.pokemon.id, syncCallback)
     
@@ -177,7 +188,7 @@ const toggleCollection = async () => {
       }
     }
   } catch (error) {
-    console.error('Error toggling collection status:', error)
+    console.error(`❌ Error toggling collection status for Pokemon #${props.pokemon.id}:`, error)
   } finally {
     isLoading.value = false
   }

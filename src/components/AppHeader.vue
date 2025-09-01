@@ -190,6 +190,14 @@
                 🔄 Cache
               </button>
 
+              <!-- Debug Button -->
+              <button
+                @click="debugSyncState"
+                class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                🐛 Debug
+              </button>
+
               <!-- Sign Out Button -->
               <button
                 @click="handleSignOut"
@@ -219,7 +227,7 @@ import { usePokemonServices } from '../composables/usePokemonServices'
 import type { Pokemon } from '../types/pokemon'
 
 const pokemonStore = usePokemonStore()
-const { syncStatus, signIn, signOut, syncToSheets, renderGoogleSignInButton, refreshFromSheets, refreshPokemonCache } = usePokemonServices()
+const { syncStatus, signIn, signOut, syncToSheets, renderGoogleSignInButton, refreshFromSheets, refreshPokemonCache, debugSyncState } = usePokemonServices()
 
 // Header visibility state
 const headerRef = ref<HTMLElement>()

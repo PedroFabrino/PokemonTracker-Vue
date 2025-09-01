@@ -45,13 +45,19 @@ declare global {
   }
 }
 
+// Global reactive state to ensure consistency across components
+const globalIsOnlineMode = ref(false)
+const globalIsInitialized = ref(false)
+const globalSyncStatus = ref('')
+
 export function usePokemonServices() {
   const pokemonStore = usePokemonStore()
   
-  const isInitialized = ref(false)
+  // Use global reactive references to avoid timing issues
+  const isOnlineMode = globalIsOnlineMode
+  const isInitialized = globalIsInitialized
+  const syncStatus = globalSyncStatus
   const initError = ref<string | null>(null)
-  const syncStatus = ref<string>('')
-  const isOnlineMode = ref(false)
   const isLoadingPokemon = ref(false) // Add loading state for Pokemon data
   
   // Persistent auth state using localStorage
@@ -338,6 +344,11 @@ export function usePokemonServices() {
       isOnlineMode.value = true
       syncStatus.value = 'Connected to Google Sheets'
       
+      console.log('✅ Authentication state restored successfully:')
+      console.log('   - Pokemon store authenticated:', pokemonStore.isAuthenticated)
+      console.log('   - Online mode set to:', isOnlineMode.value)
+      console.log('   - Sync status:', syncStatus.value)
+      
       // Load spreadsheet data if available
       if (savedSpreadsheetId.value) {
         await loadSpreadsheetData(savedSpreadsheetId.value)
@@ -587,35 +598,46 @@ export function usePokemonServices() {
   }
 
   const initializeServices = async () => {
+    console.log('🚀 initializeServices() called')
     try {
       pokemonStore.setLoading(true)
       initError.value = null
+      console.log('✅ Set loading state and cleared errors')
 
       // Check if Google client ID is configured and origins are authorized
       const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID
+      console.log('🔑 Client ID check:', clientId ? 'Available' : 'Missing')
       
       // Enable Google OAuth now that we're using the correct API
       const isGoogleConfigured = true // Using Google API Client Library with popup
+      console.log('⚙️ Google configured:', isGoogleConfigured)
       
       if (!clientId || clientId === 'your_google_client_id_here' || !isGoogleConfigured) {
-        console.warn('Google OAuth not configured or origins not authorized, using sample data')
+        console.warn('⚠️ Google OAuth not configured or origins not authorized, using sample data')
         loadSampleData()
         isInitialized.value = true
+        console.log('✅ Initialized with sample data')
         return
       }
 
+      console.log('🔧 Initializing Google services...')
       // Initialize Google services when client ID is configured
       await initializeGoogleServices()
       isInitialized.value = true
+      console.log('✅ Services initialized successfully')
+      console.log('📊 Final state - isInitialized:', isInitialized.value)
+      console.log('📊 Final state - isOnlineMode:', isOnlineMode.value)
       
     } catch (error) {
-      console.error('Failed to initialize services:', error)
+      console.error('❌ Failed to initialize services:', error)
       initError.value = error instanceof Error ? error.message : 'Unknown error'
       pokemonStore.setAuthError(initError.value)
       // Fallback to sample data
       loadSampleData()
+      console.log('🔄 Fallback to sample data due to error')
     } finally {
       pokemonStore.setLoading(false)
+      console.log('🏁 initializeServices() completed')
     }
   }
 
@@ -708,9 +730,16 @@ export function usePokemonServices() {
   }
 
   const syncPokemonToSheets = async (pokemonId: number, isCollected: boolean) => {
-    if (!pokemonStore.isAuthenticated || !savedSpreadsheetId.value) {
-      console.warn('Cannot sync - not authenticated or no spreadsheet')
-      return { success: false, error: 'Not authenticated or no spreadsheet found' }
+    console.log(`🔄 Individual sync: Pokemon #${pokemonId} -> ${isCollected ? 'COLLECTED' : 'NOT COLLECTED'}`)
+    
+    if (!pokemonStore.isAuthenticated) {
+      console.warn(`❌ Not authenticated for Pokemon #${pokemonId}`)
+      return { success: false, error: 'User not authenticated' }
+    }
+
+    if (!savedSpreadsheetId.value) {
+      console.warn(`❌ No spreadsheet ID for Pokemon #${pokemonId}`)
+      return { success: false, error: 'No spreadsheet found' }
     }
 
     try {
@@ -720,11 +749,11 @@ export function usePokemonServices() {
         isCollected
       )
       
-      console.log(`✅ Synced Pokemon #${pokemonId} to sheets: ${isCollected ? 'collected' : 'not collected'}`)
+      console.log(`✅ Synced Pokemon #${pokemonId} to Google Sheets`)
       return { success: true }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Individual sync failed'
-      console.error(`❌ Error syncing Pokemon #${pokemonId}:`, error)
+      console.error(`❌ Sync failed for Pokemon #${pokemonId}:`, errorMessage)
       return { success: false, error: errorMessage }
     }
   }
@@ -754,6 +783,60 @@ export function usePokemonServices() {
     await loadAllPokemonData()
   }
 
+  // Debug function to check current state
+  const debugSyncState = () => {
+    console.log('🐛 DEBUG: Current sync state:')
+    console.log('  📊 Authentication status:', pokemonStore.isAuthenticated)
+    console.log('  📄 Spreadsheet ID:', savedSpreadsheetId.value)
+    console.log('  🌐 Online mode:', isOnlineMode.value)
+    console.log('  🎯 Sync status:', syncStatus.value)
+    console.log('  🔧 Services initialized:', isInitialized.value)
+    console.log('  ❌ Init error:', initError.value)
+    console.log('  🏪 Pokemon store state:')
+    console.log('    - Total Pokemon:', pokemonStore.allPokemon.length)
+    console.log('    - Collected count:', pokemonStore.collectionStats.collected)
+    console.log('    - Collection percentage:', pokemonStore.collectionStats.percentage + '%')
+    console.log('    - Is authenticated:', pokemonStore.isAuthenticated)
+    
+    // Check Google API availability
+    console.log('  🌍 Google APIs:')
+    console.log('    - window.gapi available:', !!window.gapi)
+    console.log('    - window.google available:', !!window.google)
+    console.log('    - gapi.client available:', !!window.gapi?.client)
+    console.log('    - gapi.client.sheets available:', !!window.gapi?.client?.sheets)
+    
+    return {
+      isAuthenticated: pokemonStore.isAuthenticated,
+      spreadsheetId: savedSpreadsheetId.value,
+      isOnline: isOnlineMode.value,
+      syncStatus: syncStatus.value,
+      isInitialized: isInitialized.value,
+      pokemonCount: pokemonStore.allPokemon.length,
+      collectedCount: pokemonStore.collectionStats.collected
+    }
+  }
+
+  // Manual fix function for online mode
+  const fixOnlineMode = () => {
+    if (pokemonStore.isAuthenticated && savedSpreadsheetId.value) {
+      console.log('🔧 Manually fixing online mode...')
+      isOnlineMode.value = true
+      isInitialized.value = true
+      syncStatus.value = 'Connected to Google Sheets (manually fixed)'
+      console.log('✅ Online mode manually enabled')
+      return true
+    } else {
+      console.log('❌ Cannot fix - not authenticated or no spreadsheet')
+      return false
+    }
+  }
+
+  // Expose debug function globally for browser console access
+  if (typeof window !== 'undefined') {
+    (window as any).debugPokemonSync = debugSyncState
+    (window as any).fixOnlineMode = fixOnlineMode
+  }
+
   return {
     // State
     isInitialized,
@@ -772,6 +855,8 @@ export function usePokemonServices() {
     loadAllPokemonData,
     loadSampleData,
     refreshFromSheets,
-    refreshPokemonCache
+    refreshPokemonCache,
+    debugSyncState,
+    fixOnlineMode
   }
 }

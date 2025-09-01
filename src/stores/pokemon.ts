@@ -127,7 +127,10 @@ export const usePokemonStore = defineStore('pokemon', () => {
   }
 
   const togglePokemonCollected = async (pokemonId: number, syncCallback?: (id: number, isCollected: boolean) => Promise<void>) => {
-    const newStatus = !collectionStatus.value[pokemonId]
+    const currentStatus = collectionStatus.value[pokemonId] || false
+    const newStatus = !currentStatus
+    
+    // Update local status first
     collectionStatus.value[pokemonId] = newStatus
     lastSyncTime.value = new Date()
     
@@ -136,9 +139,8 @@ export const usePokemonStore = defineStore('pokemon', () => {
       try {
         await syncCallback(pokemonId, newStatus)
       } catch (error) {
-        console.error('Failed to sync to Google Sheets:', error)
-        // Optionally, you could revert the local change here
-        // collectionStatus.value[pokemonId] = !newStatus
+        console.error(`❌ Store: Sync callback failed for Pokemon #${pokemonId}:`, error)
+        // Note: We're keeping the local change even if sync fails
       }
     }
   }

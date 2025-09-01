@@ -236,12 +236,21 @@ export class GoogleSheetsService {
   }
 
   async updateCollectionStatus(spreadsheetId: string, pokemonId: number, isCollected: boolean): Promise<void> {
+    console.log(`📊 GoogleSheets: updateCollectionStatus called`)
+    console.log(`   - Spreadsheet ID: ${spreadsheetId}`)
+    console.log(`   - Pokemon ID: ${pokemonId}`)
+    console.log(`   - Collection status: ${isCollected ? 'COLLECTED' : 'NOT COLLECTED'}`)
+    
     try {
       // Find which generation this Pokemon belongs to
       const generation = this.getPokemonGeneration(pokemonId)
       const sheetName = `GEN ${generation}`
+      
+      console.log(`📋 GoogleSheets: Pokemon #${pokemonId} belongs to ${sheetName}`)
 
       // Find the row for this Pokemon
+      console.log(`🔍 GoogleSheets: Searching for Pokemon #${pokemonId} in sheet ${sheetName}`)
+      
       const response = await this.handleApiCall(() =>
         window.gapi!.client.sheets.spreadsheets.values.get({
           spreadsheetId,
@@ -249,22 +258,38 @@ export class GoogleSheetsService {
         })
       )
 
+      console.log(`📥 GoogleSheets: Retrieved sheet data for ${sheetName}`)
+      console.log(`   - Response status: ${response.status}`)
+      
       const rows = response.result.values || []
+      console.log(`   - Total rows: ${rows.length}`)
+      
       let targetRow = -1
+      const formattedPokedexNumber = pokemonAPI.formatPokedexNumber(pokemonId)
+      
+      console.log(`🔍 GoogleSheets: Looking for Pokedex number: ${formattedPokedexNumber}`)
 
       for (let i = 1; i < rows.length; i++) { // Skip header
-        if (rows[i][0] === pokemonAPI.formatPokedexNumber(pokemonId)) {
+        if (rows[i][0] === formattedPokedexNumber) {
           targetRow = i + 1 // Sheets are 1-indexed
+          console.log(`✅ GoogleSheets: Found Pokemon at row ${targetRow}`)
+          console.log(`   - Row data: [${rows[i].join(', ')}]`)
           break
         }
       }
 
       if (targetRow > 0) {
-        const collectionValue = isCollected ? 'TRUE' : 'FALSE' // TRUE = collected, FALSE = not collected
+        const collectionValue = isCollected ? 'TRUE' : 'FALSE'
+        const updateRange = `${sheetName}!C${targetRow}`
+        
+        console.log(`📝 GoogleSheets: Updating collection status`)
+        console.log(`   - Range: ${updateRange}`)
+        console.log(`   - Value: ${collectionValue}`)
+        
         await this.handleApiCall(() =>
           window.gapi!.client.sheets.spreadsheets.values.update({
             spreadsheetId,
-            range: `${sheetName}!C${targetRow}`,
+            range: updateRange,
             valueInputOption: 'RAW',
             resource: {
               values: [[collectionValue]]
@@ -272,10 +297,27 @@ export class GoogleSheetsService {
           })
         )
 
-        console.log(`✅ Updated ${pokemonAPI.formatPokemonName(rows[targetRow - 1][1])} status: ${isCollected ? 'Collected' : 'Not Collected'}`)
+        const pokemonName = pokemonAPI.formatPokemonName(rows[targetRow - 1][1])
+        console.log(`✅ GoogleSheets: Successfully updated ${pokemonName} status`)
+        console.log(`   - Pokemon: ${pokemonName} (#${pokemonId})`)
+        console.log(`   - Status: ${isCollected ? 'COLLECTED' : 'NOT COLLECTED'}`)
+        console.log(`   - Sheet: ${sheetName}`)
+        console.log(`   - Row: ${targetRow}`)
+      } else {
+        const errorMsg = `Pokemon #${pokemonId} not found in sheet ${sheetName}`
+        console.error(`❌ GoogleSheets: ${errorMsg}`)
+        console.error(`   - Searched for: ${formattedPokedexNumber}`)
+        console.error(`   - Available rows: ${rows.length - 1} (excluding header)`)
+        console.error(`   - First few rows:`, rows.slice(0, 5))
+        throw new Error(errorMsg)
       }
     } catch (error) {
-      console.error(`❌ Error updating Pokemon ${pokemonId} status:`, error)
+      console.error(`❌ GoogleSheets: Error updating Pokemon ${pokemonId} status:`)
+      console.error(`   - Error message: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error(`   - Full error:`, error)
+      console.error(`   - Spreadsheet ID: ${spreadsheetId}`)
+      console.error(`   - Pokemon ID: ${pokemonId}`)
+      console.error(`   - Target status: ${isCollected ? 'COLLECTED' : 'NOT COLLECTED'}`)
       throw error
     }
   }
