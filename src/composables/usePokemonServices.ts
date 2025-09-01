@@ -816,25 +816,9 @@ export function usePokemonServices() {
     }
   }
 
-  // Manual fix function for online mode
-  const fixOnlineMode = () => {
-    if (pokemonStore.isAuthenticated && savedSpreadsheetId.value) {
-      console.log('🔧 Manually fixing online mode...')
-      isOnlineMode.value = true
-      isInitialized.value = true
-      syncStatus.value = 'Connected to Google Sheets (manually fixed)'
-      console.log('✅ Online mode manually enabled')
-      return true
-    } else {
-      console.log('❌ Cannot fix - not authenticated or no spreadsheet')
-      return false
-    }
-  }
-
   // Expose debug function globally for browser console access
   if (typeof window !== 'undefined') {
     (window as any).debugPokemonSync = debugSyncState
-    (window as any).fixOnlineMode = fixOnlineMode
   }
 
   return {
