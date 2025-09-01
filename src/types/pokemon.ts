@@ -3,11 +3,195 @@ export interface Pokemon {
   name: string
   sprites: {
     front_default: string
-    other: {
-      'official-artwork': {
-        front_default: string
+    front_shiny?: string | null
+    back_default?: string | null
+    back_shiny?: string | null
+    front_female?: string | null
+    back_female?: string | null
+    front_shiny_female?: string | null
+    back_shiny_female?: string | null
+    other?: {
+      'official-artwork'?: {
+        front_default?: string
+        front_shiny?: string | null
       }
+      home?: {
+        front_default?: string | null
+        front_female?: string | null
+        front_shiny?: string | null
+        front_shiny_female?: string | null
+      }
+      dream_world?: {
+        front_default?: string | null
+        front_female?: string | null
+      }
+      showdown?: {
+        front_default?: string | null
+        front_female?: string | null
+        front_shiny?: string | null
+        front_shiny_female?: string | null
+        back_default?: string | null
+        back_female?: string | null
+        back_shiny?: string | null
+        back_shiny_female?: string | null
+      }
+      // Allow any other sprite collections that might exist
+      [key: string]: any
     }
+    versions?: {
+      'generation-i'?: {
+        'red-blue'?: {
+          front_default?: string | null
+          back_default?: string | null
+          front_gray?: string | null
+          back_gray?: string | null
+          front_transparent?: string | null
+          back_transparent?: string | null
+        }
+        yellow?: {
+          front_default?: string | null
+          back_default?: string | null
+          front_gray?: string | null
+          back_gray?: string | null
+          front_transparent?: string | null
+          back_transparent?: string | null
+        }
+      }
+      'generation-ii'?: {
+        crystal?: {
+          front_default?: string | null
+          front_shiny?: string | null
+          back_default?: string | null
+          back_shiny?: string | null
+          front_transparent?: string | null
+          back_transparent?: string | null
+          front_shiny_transparent?: string | null
+          back_shiny_transparent?: string | null
+        }
+        gold?: {
+          front_default?: string | null
+          front_shiny?: string | null
+          back_default?: string | null
+          back_shiny?: string | null
+          front_transparent?: string | null
+        }
+        silver?: {
+          front_default?: string | null
+          front_shiny?: string | null
+          back_default?: string | null
+          back_shiny?: string | null
+          front_transparent?: string | null
+        }
+      }
+      'generation-iii'?: {
+        emerald?: {
+          front_default?: string | null
+          front_shiny?: string | null
+        }
+        'firered-leafgreen'?: {
+          back_default?: string | null
+          back_shiny?: string | null
+          front_default?: string | null
+          front_shiny?: string | null
+        }
+        'ruby-sapphire'?: {
+          back_default?: string | null
+          back_shiny?: string | null
+          front_default?: string | null
+          front_shiny?: string | null
+        }
+      }
+      'generation-iv'?: {
+        'diamond-pearl'?: {
+          back_default?: string | null
+          back_female?: string | null
+          back_shiny?: string | null
+          back_shiny_female?: string | null
+          front_default?: string | null
+          front_female?: string | null
+          front_shiny?: string | null
+          front_shiny_female?: string | null
+        }
+        'heartgold-soulsilver'?: {
+          back_default?: string | null
+          back_female?: string | null
+          back_shiny?: string | null
+          back_shiny_female?: string | null
+          front_default?: string | null
+          front_female?: string | null
+          front_shiny?: string | null
+          front_shiny_female?: string | null
+        }
+        platinum?: {
+          back_default?: string | null
+          back_female?: string | null
+          back_shiny?: string | null
+          back_shiny_female?: string | null
+          front_default?: string | null
+          front_female?: string | null
+          front_shiny?: string | null
+          front_shiny_female?: string | null
+        }
+      }
+      'generation-v'?: {
+        'black-white'?: {
+          front_default?: string | null
+          front_shiny?: string | null
+          back_default?: string | null
+          back_shiny?: string | null
+          front_female?: string | null
+          back_female?: string | null
+          front_shiny_female?: string | null
+          back_shiny_female?: string | null
+          animated?: {
+            front_default?: string | null
+            front_shiny?: string | null
+            back_default?: string | null
+            back_shiny?: string | null
+            front_female?: string | null
+            back_female?: string | null
+            front_shiny_female?: string | null
+            back_shiny_female?: string | null
+          }
+        }
+      }
+      'generation-vi'?: {
+        'omegaruby-alphasapphire'?: {
+          front_default?: string | null
+          front_female?: string | null
+          front_shiny?: string | null
+          front_shiny_female?: string | null
+        }
+        'x-y'?: {
+          front_default?: string | null
+          front_female?: string | null
+          front_shiny?: string | null
+          front_shiny_female?: string | null
+        }
+      }
+      'generation-vii'?: {
+        icons?: {
+          front_default?: string | null
+          front_female?: string | null
+        }
+        'ultra-sun-ultra-moon'?: {
+          front_default?: string | null
+          front_female?: string | null
+          front_shiny?: string | null
+          front_shiny_female?: string | null
+        }
+      }
+      'generation-viii'?: {
+        icons?: {
+          front_default?: string | null
+          front_female?: string | null
+        }
+      }
+      // Allow any other generation that might exist
+      [key: string]: any
+    }
+    // Allow any other sprite properties that might exist
+    [key: string]: any
   }
   types: Array<{
     type: {

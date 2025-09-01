@@ -64,14 +64,7 @@ class NonBlockingPokemonAPI {
     return {
       id: pokemonData.id,
       name: pokemonData.name,
-      sprites: {
-        front_default: pokemonData.sprites.front_default,
-        other: {
-          'official-artwork': {
-            front_default: pokemonData.sprites.other?.['official-artwork']?.front_default || pokemonData.sprites.front_default
-          }
-        }
-      },
+      sprites: pokemonData.sprites, // Use the complete sprites object from PokeAPI
       types: pokemonData.types,
       height: pokemonData.height,
       weight: pokemonData.weight,

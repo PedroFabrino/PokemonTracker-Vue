@@ -9,7 +9,7 @@ interface PokemonCache {
 
 class PokemonCacheService {
   private readonly CACHE_KEY = 'pokemon-tracker-cache'
-  private readonly CACHE_VERSION = '1.0.0'
+  private readonly CACHE_VERSION = '1.1.0' // Updated to force cache refresh for complete sprite data
   private readonly CACHE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
 
   // Save Pokemon data to localStorage

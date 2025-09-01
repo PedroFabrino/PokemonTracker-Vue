@@ -5,6 +5,7 @@
       'pokemon-card',
       { 
         'collected': isCollected,
+        'uncaught': !isCollected,
         'filtered-out': isFilteredOut
       }
     ]"
@@ -30,7 +31,8 @@
     <!-- Pokemon Image -->
     <div class="flex items-center justify-center p-3 h-32">
       <img
-        :src="pokemon.sprites.other['official-artwork']?.front_default || pokemon.sprites.front_default"
+        :key="imageKey"
+        :src="spriteUrl"
         :alt="pokemon.name"
         class="pokemon-sprite max-h-full max-w-full"
         @error="handleImageError"
@@ -122,6 +124,7 @@ import { ref, computed } from 'vue'
 import { CheckIcon } from '@heroicons/vue/24/solid'
 import FloatingVue from 'floating-vue'
 import { usePokemonStore } from '../stores/pokemon'
+import { useSpriteConfigStore } from '../stores/spriteConfig'
 import { usePokemonServices } from '../composables/usePokemonServices'
 import { POKEMON_TYPES } from '../types/pokemon'
 import type { Pokemon } from '../types/pokemon'
@@ -136,6 +139,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const pokemonStore = usePokemonStore()
+const spriteConfig = useSpriteConfigStore()
 const { syncPokemonToSheets, isOnlineMode } = usePokemonServices()
 
 // Local state
@@ -148,6 +152,35 @@ const isCollected = computed(() => pokemonStore.isCollected(props.pokemon.id))
 const generationInfo = computed(() => 
   pokemonStore.getGenerationForPokemon(props.pokemon.id)
 )
+
+// Get the sprite URL using the configuration
+const spriteUrl = computed(() => {
+  const url = spriteConfig.getPokemonSpriteUrl(props.pokemon)
+  
+  // Debug logging for Pokemon ID 1
+  if (props.pokemon.id === 1) {
+    console.log(`🎯 PokemonCard computed spriteUrl for ${props.pokemon.name}:`, {
+      url,
+      selectedStyle: spriteConfig.selectedStyle,
+      showShinyVariants: spriteConfig.showShinyVariants,
+      timestamp: new Date().toISOString()
+    })
+  }
+  
+  return url
+})
+
+// Create a reactive key that changes when sprite config changes
+const imageKey = computed(() => {
+  const key = `${props.pokemon.id}-${spriteConfig.selectedStyle}-${spriteConfig.showShinyVariants}`
+  
+  // Debug logging for Pokemon ID 1
+  if (props.pokemon.id === 1) {
+    console.log(`🔑 PokemonCard imageKey for ${props.pokemon.name}:`, key)
+  }
+  
+  return key
+})
 
 // Methods
 const toggleCollection = async () => {
@@ -196,13 +229,23 @@ const toggleCollection = async () => {
 
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  // Fallback to front_default if official artwork fails
-  if (img.src !== props.pokemon.sprites.front_default) {
-    img.src = props.pokemon.sprites.front_default
-  } else {
-    // If even front_default fails, use a placeholder
-    img.src = '/pokemon-placeholder.svg'
+  const currentSrc = img.src
+  
+  // First, try official artwork if we're not already using it
+  const officialArtwork = props.pokemon.sprites.other?.['official-artwork']?.front_default
+  if (officialArtwork && currentSrc !== officialArtwork) {
+    img.src = officialArtwork
+    return
   }
+  
+  // Then fallback to front_default if different
+  if (currentSrc !== props.pokemon.sprites.front_default) {
+    img.src = props.pokemon.sprites.front_default
+    return
+  }
+  
+  // Finally use a placeholder if even front_default fails
+  img.src = '/pokemon-placeholder.svg'
 }
 
 const formatPokemonName = (name: string) => {

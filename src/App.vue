@@ -12,9 +12,11 @@ import {
 import AppHeader from './components/AppHeader.vue'
 import VirtualPokemonGrid from './components/VirtualPokemonGrid.vue'
 import { usePokemonStore } from './stores/pokemon'
+import { useSpriteConfigStore } from './stores/spriteConfig'
 import { usePokemonServices } from './composables/usePokemonServices'
 
 const pokemonStore = usePokemonStore()
+const spriteConfig = useSpriteConfigStore()
 const pokemonServices = usePokemonServices()
 
 // Local state
@@ -55,6 +57,10 @@ const formatSyncTime = (date: Date) => {
 
 // Initialize services on mount
 onMounted(async () => {
+  // Initialize sprite configuration from localStorage
+  spriteConfig.loadConfig()
+  
+  // Initialize Pokemon services
   await pokemonServices.initializeServices()
 })
 
