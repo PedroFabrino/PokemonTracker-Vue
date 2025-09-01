@@ -40,14 +40,18 @@ jobs:
       - name: Debug environment variables
         run: |
           echo "Checking secrets availability:"
+          echo "Secrets context check:"
+          echo "OAuth Client ID secret exists: ${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID != '' && secrets.VITE_GOOGLE_OAUTH_CLIENT_ID != null }}"
+          echo "API Key secret exists: ${{ secrets.VITE_GOOGLE_API_KEY != '' && secrets.VITE_GOOGLE_API_KEY != null }}"
+          echo "Environment variables:"
           echo "VITE_GOOGLE_OAUTH_CLIENT_ID length: ${#VITE_GOOGLE_OAUTH_CLIENT_ID}"
           echo "VITE_GOOGLE_API_KEY length: ${#VITE_GOOGLE_API_KEY}"
           echo "VITE_GOOGLE_OAUTH_CLIENT_ID starts with: ${VITE_GOOGLE_OAUTH_CLIENT_ID:0:10}..."
           echo "Environment variables available during build:"
           env | grep VITE_ || echo "No VITE_ variables found"
         env:
-          VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}
-          VITE_GOOGLE_API_KEY: ${{ secrets.VITE_GOOGLE_API_KEY }}
+          VITE_GOOGLE_OAUTH_CLIENT_ID: "${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}"
+          VITE_GOOGLE_API_KEY: "${{ secrets.VITE_GOOGLE_API_KEY }}"
         
       - name: Build
         run: npm run build
