@@ -606,7 +606,8 @@ export function usePokemonServices() {
 
       // Check if Google client ID is configured and origins are authorized
       const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID
-      console.log('🔑 Client ID check:', clientId ? 'Available' : 'Missing')
+      console.log('🔑 Client ID check:', clientId ? `Available (${clientId.substring(0, 10)}...)` : 'Missing')
+      console.log('🌍 Current origin:', window.location.origin)
       
       // Enable Google OAuth now that we're using the correct API
       const isGoogleConfigured = true // Using Google API Client Library with popup
