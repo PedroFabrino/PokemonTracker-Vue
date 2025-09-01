@@ -1,20 +1,106 @@
-# .
+# Pokemon Tracker Vue
 
-This template should help get you started developing with Vue 3 in Vite.
+A modern Pokemon collection tracker built with Vue 3, featuring Google Sheets integration for cloud sync and a beautiful responsive interface.
 
-## Recommended IDE Setup
+## ✨ Features
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- 🎯 **Complete Pokemon Database** - All 1025+ Pokemon from PokeAPI
+- ☁️ **Google Sheets Sync** - Automatic cloud backup of your collection
+- 🔍 **Smart Search** - Jump to any Pokemon with autocomplete
+- 📱 **Responsive Design** - Works perfectly on desktop and mobile
+- 💾 **Local Caching** - 7-day cache for instant loading
+- 🎨 **Pokemon-themed UI** - Beautiful cards with official artwork
+- 🔄 **Individual Sync** - Real-time sync when toggling Pokemon
 
-## Type Support for `.vue` Imports in TS
+## 🚀 Live Demo
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+Visit the live application: [Pokemon Tracker](https://pedrofabrino.github.io/PokemonTracker-Vue/)
 
-## Customize configuration
+## 🛠️ Setup & Development
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+### Prerequisites
 
-## Project Setup
+- Node.js 20+ 
+- npm or yarn
+- Google account (for cloud sync)
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+VITE_GOOGLE_OAUTH_CLIENT_ID=your_google_oauth_client_id_here
+```
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/PedroFabrino/PokemonTracker-Vue.git
+cd PokemonTracker-Vue
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+## 📋 Available Scripts
+
+### Development
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build locally
+```
+
+### Quality Assurance
+
+```bash
+npm run test:unit    # Run unit tests
+npm run test:e2e     # Run end-to-end tests
+npm run lint         # Run ESLint
+npm run format       # Format code with Prettier
+```
+
+## 🔧 Configuration
+
+### Google Sheets Integration
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project or select existing one
+3. Enable Google Sheets API
+4. Create OAuth 2.0 Client ID credentials
+5. Add your domain to authorized origins
+6. Copy the Client ID to your `.env` file
+
+### GitHub Pages Deployment
+
+The project includes automated GitHub Pages deployment via GitHub Actions. To deploy:
+
+1. Fork this repository
+2. Add `VITE_GOOGLE_OAUTH_CLIENT_ID` to repository secrets
+3. Enable GitHub Pages in repository settings
+4. Push changes to trigger deployment
+
+## 🏗️ Architecture
+
+- **Vue 3** with Composition API
+- **TypeScript** for type safety  
+- **Vite** for fast development and building
+- **Tailwind CSS** for styling
+- **Pinia** for state management
+- **Vue Router** for navigation
+
+## 📝 License
+
+MIT License - see LICENSE file for details.
+
+## 📋 Available Scripts
+
+### Project Setup
 
 ```sh
 npm install
