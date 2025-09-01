@@ -37,11 +37,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
+      - name: Debug environment variables
+        run: |
+          echo "VITE_GOOGLE_OAUTH_CLIENT_ID is set: ${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID != '' }}"
+          echo "Environment variables available during build:"
+          env | grep VITE_ || echo "No VITE_ variables found"
+        env:
+          VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}
+          VITE_GOOGLE_API_KEY: ${{ secrets.VITE_GOOGLE_API_KEY }}
+        
       - name: Build
         run: npm run build
         env:
-          # Add your Google OAuth Client ID as a GitHub secret
+          # Add your Google OAuth Client ID and API Key as GitHub secrets
           VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}
+          VITE_GOOGLE_API_KEY: ${{ secrets.VITE_GOOGLE_API_KEY }}
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
