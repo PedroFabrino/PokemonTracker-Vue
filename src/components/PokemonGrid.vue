@@ -195,7 +195,7 @@ const getPageCollectedCount = (page: Pokemon[]) => {
 .binder-page-section {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 1rem;
   background: #f9fafb;
   border-radius: 0.75rem;
@@ -218,8 +218,8 @@ const getPageCollectedCount = (page: Pokemon[]) => {
 .loading-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  padding: 2rem;
+  gap: 0.75rem;
+  padding: 1rem;
 }
 
 .loading-card {

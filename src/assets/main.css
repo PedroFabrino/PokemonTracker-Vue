@@ -5,7 +5,7 @@
 /* Custom Pokemon Card Styles */
 @layer components {
   .pokemon-card {
-    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-gray-200 hover:border-pokemon-400 relative overflow-hidden aspect-card;
+    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-gray-200 hover:border-pokemon-400 relative overflow-hidden;
   }
   
   .pokemon-card.collected {
@@ -46,7 +46,7 @@
   }
   
   .empty-slot {
-    @apply bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl aspect-card opacity-50;
+    @apply bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl opacity-50 h-40;
   }
   
   .sticky-header {
@@ -175,7 +175,7 @@ html {
 }
 
 .loading-card {
-  @apply aspect-card bg-gray-200 rounded-xl animate-pulse;
+  @apply bg-gray-200 rounded-xl animate-pulse h-40;
 }
 
 .loading-text {

@@ -28,7 +28,7 @@
     </div>
 
     <!-- Pokemon Image -->
-    <div class="flex items-center justify-center p-4 h-32">
+    <div class="flex items-center justify-center p-3 h-32">
       <img
         :src="pokemon.sprites.other['official-artwork']?.front_default || pokemon.sprites.front_default"
         :alt="pokemon.name"
@@ -39,19 +39,19 @@
     </div>
 
     <!-- Pokemon Info -->
-    <div class="p-3 pt-0">
+    <div class="px-2 pb-2">
       <!-- Name -->
-      <h3 class="font-bold text-gray-900 text-center mb-2 truncate">
+      <h3 class="font-bold text-gray-900 text-center mb-1 truncate text-sm">
         {{ formatPokemonName(pokemon.name) }}
       </h3>
 
       <!-- Types -->
-      <div class="flex justify-center gap-1 mb-2">
+      <div class="flex justify-center gap-1 mb-1">
         <span
           v-for="type in pokemon.types"
           :key="type.type.name"
           :class="[
-            'px-2 py-1 rounded-full text-xs font-medium text-white',
+            'px-1.5 py-0.5 rounded-full text-xs font-medium text-white',
             getTypeColorClass(type.type.name)
           ]"
         >
@@ -61,7 +61,7 @@
 
       <!-- Generation Badge -->
       <div class="flex justify-center">
-        <span class="generation-badge bg-gray-100 text-gray-700">
+        <span class="generation-badge bg-gray-100 text-gray-700 text-xs px-1.5 py-0.5">
           {{ generationInfo?.name }}
         </span>
       </div>
