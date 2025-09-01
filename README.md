@@ -1,4 +1,4 @@
-# Pokemon Tracker Vue
+# PokemonTracker
 
 A modern Pokemon collection tracker built with Vue 3, featuring Google Sheets integration for cloud sync and a beautiful responsive interface.
 
@@ -14,7 +14,7 @@ A modern Pokemon collection tracker built with Vue 3, featuring Google Sheets in
 
 ## 🚀 Live Demo
 
-Visit the live application: [Pokemon Tracker](https://pedrofabrino.github.io/PokemonTracker-Vue/)
+Visit the live application: [PokemonTracker](https://pedrofabrino.github.io/PokemonTracker-Vue/)
 
 ## 🛠️ Setup & Development
 

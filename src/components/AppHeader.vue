@@ -13,12 +13,12 @@
           <div class="flex-shrink-0">
             <img
               src="/pokeball.svg"
-              alt="Pokemon Tracker"
+              alt="PokemonTracker"
               class="h-8 w-8"
             />
           </div>
           <h1 class="text-xl font-bold text-gray-900">
-            Pokemon Tracker
+            PokemonTracker
           </h1>
         </div>
 
