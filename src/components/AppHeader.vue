@@ -1,0 +1,439 @@
+<template>
+  <header
+    ref="headerRef"
+    :class="[
+      'sticky-header',
+      { 'header-hidden': isHidden }
+    ]"
+  >
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo and Title -->
+        <div class="flex items-center gap-3">
+          <div class="flex-shrink-0">
+            <img
+              src="/pokeball.svg"
+              alt="Pokemon Tracker"
+              class="h-8 w-8"
+            />
+          </div>
+          <h1 class="text-xl font-bold text-gray-900">
+            Pokemon Tracker
+          </h1>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-lg mx-8">
+          <div class="search-container">
+            <div class="relative">
+              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search Pokemon by name or number..."
+                class="filter-input pl-10 w-full"
+                @input="handleSearchInput"
+                @keydown="handleKeyDown"
+                @focus="showAutocomplete = true"
+                @blur="handleSearchBlur"
+              />
+              <button
+                v-if="searchQuery"
+                @click="clearSearch"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                <XMarkIcon class="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+
+            <!-- Autocomplete Dropdown -->
+            <div
+              v-if="showAutocomplete && searchSuggestions.length > 0"
+              class="autocomplete-dropdown show"
+            >
+              <div
+                v-for="(pokemon, index) in searchSuggestions"
+                :key="pokemon.id"
+                :class="[
+                  'autocomplete-item',
+                  { 'highlighted': index === selectedSuggestionIndex }
+                ]"
+                @mousedown="selectPokemon(pokemon)"
+                @mouseenter="selectedSuggestionIndex = index"
+              >
+                <img
+                  :src="pokemon.sprites.front_default"
+                  :alt="pokemon.name"
+                  class="w-8 h-8"
+                />
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900">
+                    {{ formatPokemonName(pokemon.name) }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    #{{ pokemon.id.toString().padStart(3, '0') }} • {{ getGenerationName(pokemon.id) }}
+                  </div>
+                </div>
+                <div
+                  v-if="pokemonStore.isCollected(pokemon.id)"
+                  class="text-green-600"
+                >
+                  <CheckIcon class="h-5 w-5" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="flex items-center gap-4">
+          <!-- Generation Filter -->
+          <select
+            v-model="selectedGeneration"
+            class="filter-select"
+            @change="handleGenerationChange"
+          >
+            <option value="">All Generations</option>
+            <option
+              v-for="generation in pokemonStore.generations"
+              :key="generation.id"
+              :value="generation.id.toString()"
+            >
+              {{ generation.name }}
+            </option>
+          </select>
+
+          <!-- Collection Filter -->
+          <button
+            @click="pokemonStore.toggleCollectedFilter()"
+            :class="[
+              'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              pokemonStore.filters.showCollectedOnly
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ]"
+          >
+            {{ pokemonStore.filters.showCollectedOnly ? 'Show All' : 'Collected Only' }}
+          </button>
+
+          <!-- Google Auth -->
+          <div class="flex items-center gap-3">
+            <!-- Auth Status -->
+            <div class="flex items-center gap-2">
+              <div
+                :class="[
+                  'status-indicator',
+                  pokemonStore.isAuthenticated ? 'status-authenticated' : 'status-unauthenticated'
+                ]"
+              >
+                <div
+                  :class="[
+                    'w-2 h-2 rounded-full',
+                    pokemonStore.isAuthenticated ? 'bg-green-500' : 'bg-yellow-500'
+                  ]"
+                />
+                {{ pokemonStore.isAuthenticated ? 'Google Sheets' : 'Sample Data' }}
+              </div>
+            </div>
+
+            <!-- Sync Status -->
+            <div
+              v-if="syncStatus"
+              class="text-xs text-gray-500 max-w-40 truncate"
+              :title="syncStatus"
+            >
+              {{ syncStatus }}
+            </div>
+
+            <!-- Auth Button -->
+            <div v-if="!pokemonStore.isAuthenticated" class="google-signin-container">
+              <div id="google-signin-button" ref="googleSigninButton"></div>
+              <button
+                v-if="!isGoogleAvailable"
+                @click="handleSignIn"
+                :disabled="pokemonStore.isLoading"
+                class="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <span v-if="pokemonStore.isLoading">Signing in...</span>
+                <span v-else>Sign in (Demo)</span>
+              </button>
+            </div>
+
+            <div v-else class="flex items-center gap-2">
+              <!-- Sync TO Sheets Button -->
+              <button
+                @click="handleSync"
+                :disabled="pokemonStore.isLoading"
+                class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Sync TO Google Sheets"
+              >
+                ↑ Sync
+              </button>
+
+              <!-- Sync FROM Sheets Button -->
+              <button
+                @click="handleRefreshFromSheets"
+                :disabled="pokemonStore.isLoading"
+                class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Sync FROM Google Sheets"
+              >
+                ↓ Refresh
+              </button>
+
+              <!-- Refresh Pokemon Cache Button -->
+              <button
+                @click="handleRefreshCache"
+                :disabled="pokemonStore.isLoading"
+                class="px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Refresh Pokemon cache (check for new Pokemon)"
+              >
+                🔄 Cache
+              </button>
+
+              <!-- Sign Out Button -->
+              <button
+                @click="handleSignOut"
+                class="px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+
+          <!-- Collection Stats -->
+          <div class="text-sm text-gray-600">
+            {{ pokemonStore.collectionStats.collected }} / {{ pokemonStore.collectionStats.total }}
+            ({{ pokemonStore.collectionStats.percentage }}%)
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { MagnifyingGlassIcon, XMarkIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import { usePokemonStore } from '../stores/pokemon'
+import { usePokemonServices } from '../composables/usePokemonServices'
+import type { Pokemon } from '../types/pokemon'
+
+const pokemonStore = usePokemonStore()
+const { syncStatus, signIn, signOut, syncToSheets, renderGoogleSignInButton, refreshFromSheets, refreshPokemonCache } = usePokemonServices()
+
+// Header visibility state
+const headerRef = ref<HTMLElement>()
+const isHidden = ref(false)
+const lastScrollY = ref(0)
+const scrollThreshold = 10
+
+// Search state
+const searchQuery = ref('')
+const showAutocomplete = ref(false)
+const selectedSuggestionIndex = ref(-1)
+
+// Filter state
+const selectedGeneration = ref('')
+
+// Google sign-in button
+const googleSigninButton = ref<HTMLElement>()
+const isGoogleAvailable = ref(false)
+
+// Google Auth handlers
+const handleSignIn = async () => {
+  const result = await signIn()
+  if (!result.success) {
+    console.error('Sign in failed:', result.error)
+  }
+}
+
+const handleSignOut = async () => {
+  await signOut()
+}
+
+const handleSync = async () => {
+  const result = await syncToSheets()
+  if (!result.success) {
+    console.error('Sync failed:', result.error)
+  }
+}
+
+const handleRefreshFromSheets = async () => {
+  console.log('🔄 Refreshing collection from Google Sheets...')
+  const result = await refreshFromSheets()
+  if (result) {
+    console.log('✅ Successfully refreshed from Google Sheets')
+  } else {
+    console.error('❌ Failed to refresh from Google Sheets')
+  }
+}
+
+const handleRefreshCache = async () => {
+  console.log('🔄 Refreshing Pokemon cache...')
+  await refreshPokemonCache()
+}
+
+// Auto-hide header on scroll
+const handleScroll = () => {
+  if (!headerRef.value) return
+
+  const currentScrollY = window.scrollY
+
+  if (Math.abs(currentScrollY - lastScrollY.value) < scrollThreshold) {
+    return
+  }
+
+  if (currentScrollY > lastScrollY.value && currentScrollY > 100) {
+    // Scrolling down - hide header
+    isHidden.value = true
+  } else {
+    // Scrolling up - show header
+    isHidden.value = false
+  }
+
+  lastScrollY.value = currentScrollY
+}
+
+// Search functionality
+const searchSuggestions = computed(() => {
+  if (!searchQuery.value || searchQuery.value.length < 2) {
+    return []
+  }
+
+  const query = searchQuery.value.toLowerCase()
+  return pokemonStore.allPokemon
+    .filter(pokemon => 
+      pokemon.name.toLowerCase().includes(query) ||
+      pokemon.id.toString().includes(query)
+    )
+    .slice(0, 8) // Limit to 8 suggestions
+})
+
+const handleSearchInput = () => {
+  pokemonStore.setSearchQuery(searchQuery.value)
+  selectedSuggestionIndex.value = -1
+  showAutocomplete.value = searchQuery.value.length >= 2
+}
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (!showAutocomplete.value || searchSuggestions.value.length === 0) return
+
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      selectedSuggestionIndex.value = Math.min(
+        selectedSuggestionIndex.value + 1,
+        searchSuggestions.value.length - 1
+      )
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      selectedSuggestionIndex.value = Math.max(selectedSuggestionIndex.value - 1, -1)
+      break
+    case 'Enter':
+      event.preventDefault()
+      if (selectedSuggestionIndex.value >= 0) {
+        selectPokemon(searchSuggestions.value[selectedSuggestionIndex.value])
+      }
+      break
+    case 'Escape':
+      showAutocomplete.value = false
+      selectedSuggestionIndex.value = -1
+      break
+  }
+}
+
+const handleSearchBlur = () => {
+  // Delay hiding to allow click on suggestions
+  setTimeout(() => {
+    showAutocomplete.value = false
+    selectedSuggestionIndex.value = -1
+  }, 200)
+}
+
+const selectPokemon = (pokemon: Pokemon) => {
+  searchQuery.value = pokemon.name
+  pokemonStore.setSearchQuery(pokemon.name)
+  showAutocomplete.value = false
+  selectedSuggestionIndex.value = -1
+
+  // Scroll to the Pokemon card
+  nextTick(() => {
+    const pokemonCard = document.querySelector(`[data-pokemon-id="${pokemon.id}"]`)
+    if (pokemonCard) {
+      pokemonCard.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // Add highlight effect
+      pokemonCard.classList.add('highlight-pokemon')
+      setTimeout(() => {
+        pokemonCard.classList.remove('highlight-pokemon')
+      }, 3000)
+    }
+  })
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  pokemonStore.setSearchQuery('')
+  showAutocomplete.value = false
+}
+
+const handleGenerationChange = () => {
+  pokemonStore.setGenerationFilter(selectedGeneration.value || null)
+}
+
+const formatPokemonName = (name: string) => {
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
+
+const getGenerationName = (pokemonId: number) => {
+  const generation = pokemonStore.generations.find(gen => 
+    pokemonId >= gen.startId && pokemonId <= gen.endId
+  )
+  return generation ? `Gen ${generation.id}` : 'Unknown'
+}
+
+// Lifecycle
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  
+  // Initialize filters from store
+  searchQuery.value = pokemonStore.filters.searchQuery
+  selectedGeneration.value = pokemonStore.filters.selectedGeneration || ''
+  
+  // Render Google Sign-In button after a short delay to ensure Google scripts are loaded
+  setTimeout(() => {
+    if (googleSigninButton.value) {
+      const success = renderGoogleSignInButton(googleSigninButton.value)
+      isGoogleAvailable.value = success
+    }
+  }, 1000)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+</script>
+
+<style scoped>
+.header-hidden {
+  transform: translateY(-100%);
+}
+
+.autocomplete-item:hover {
+  background-color: theme('colors.gray.50');
+}
+
+.autocomplete-item.highlighted {
+  background-color: theme('colors.pokemon.50');
+}
+
+.google-signin-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#google-signin-button {
+  min-height: 40px;
+}
+</style>

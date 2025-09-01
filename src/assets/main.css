@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Pokemon Card Styles */
+@layer components {
+  .pokemon-card {
+    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-gray-200 hover:border-pokemon-400 relative overflow-hidden aspect-card;
+  }
+  
+  .pokemon-card.collected {
+    @apply bg-gradient-to-br from-green-50 to-green-100 border-green-400 shadow-green-200;
+  }
+  
+  .pokemon-card.filtered-out {
+    @apply opacity-30 grayscale;
+  }
+  
+  .pokemon-card.highlight-pokemon {
+    @apply ring-4 ring-yellow-400 ring-opacity-75 scale-105 z-10;
+    animation: highlight-pulse 2s ease-in-out;
+  }
+  
+  .pokemon-card:hover {
+    @apply scale-105 z-10;
+  }
+  
+  .pokemon-sprite {
+    @apply w-full h-auto object-contain transition-transform duration-300;
+  }
+  
+  .pokemon-card:hover .pokemon-sprite {
+    @apply scale-110;
+  }
+  
+  .binder-page-section {
+    @apply grid grid-cols-4 gap-4 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-inner mb-8 border border-gray-200;
+  }
+  
+  .binder-page {
+    @apply bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden;
+  }
+  
+  .binder-page-header {
+    @apply bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200;
+  }
+  
+  .empty-slot {
+    @apply bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl aspect-card opacity-50;
+  }
+  
+  .sticky-header {
+    @apply sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm transition-all duration-300;
+  }
+  
+  .header-hidden {
+    @apply -translate-y-full;
+  }
+  
+  .search-container {
+    @apply relative;
+  }
+  
+  .autocomplete-dropdown {
+    @apply absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto hidden;
+  }
+  
+  .autocomplete-dropdown.show {
+    @apply block;
+  }
+  
+  .autocomplete-item {
+    @apply p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-3;
+  }
+  
+  .scroll-nav-btn {
+    @apply px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-sm font-medium;
+  }
+  
+  .autocomplete-item.highlighted {
+    @apply bg-pokemon-50 border-pokemon-200;
+  }
+  
+  .generation-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+  
+  .scroll-nav-btn {
+    @apply px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 text-sm font-medium;
+  }
+  
+  .scroll-nav-btn:hover {
+    @apply shadow-md;
+  }
+}
+
+/* Custom animations */
+@keyframes highlight-pulse {
+  0%, 100% { transform: scale(1.05); }
+  50% { transform: scale(1.1); }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Status indicators */
+.status-indicator {
+  @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium;
+}
+
+.status-online {
+  @apply bg-green-100 text-green-800 border border-green-200;
+}
+
+.status-offline {
+  @apply bg-gray-100 text-gray-800 border border-gray-200;
+}
+
+.status-authenticated {
+  @apply bg-blue-100 text-blue-800 border border-blue-200;
+}
+
+.status-unauthenticated {
+  @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+}
+
+/* Filter styles */
+.filter-input {
+  @apply px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pokemon-500 focus:border-pokemon-500 outline-none transition-colors;
+}
+
+.filter-select {
+  @apply px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-pokemon-500 focus:border-pokemon-500 outline-none transition-colors;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-4 py-2 bg-pokemon-600 text-white rounded-lg hover:bg-pokemon-700 focus:ring-2 focus:ring-pokemon-500 focus:ring-offset-2 transition-colors font-medium;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium;
+}
+
+.btn-danger {
+  @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors font-medium;
+}
+
+/* Loading states */
+.loading-grid {
+  @apply grid grid-cols-4 gap-4;
+}
+
+.loading-card {
+  @apply aspect-card bg-gray-200 rounded-xl animate-pulse;
+}
+
+.loading-text {
+  @apply h-4 bg-gray-300 rounded animate-pulse;
+}
+
+.loading-circle {
+  @apply w-6 h-6 bg-gray-300 rounded-full animate-pulse;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .binder-page-section {
+    @apply grid-cols-2 gap-2 p-3;
+  }
+  
+  .loading-grid {
+    @apply grid-cols-2;
+  }
+}
