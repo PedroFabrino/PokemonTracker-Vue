@@ -43,26 +43,28 @@ class PokemonAPIService {
 
   async getAllPokemonSpecies(): Promise<PokemonSpecies[]> {
     console.log('🔍 Fetching all Pokemon species...')
-    
+
     // Get total count first
     const initialResponse = await this.fetchWithCache(`${this.baseUrl}/pokemon-species?limit=1`)
     const totalCount = initialResponse.count
-    
+
     console.log(`📊 Found ${totalCount} Pokemon species`)
-    
+
     // Fetch all species
-    const response = await this.fetchWithCache(`${this.baseUrl}/pokemon-species?limit=${totalCount}`)
+    const response = await this.fetchWithCache(
+      `${this.baseUrl}/pokemon-species?limit=${totalCount}`,
+    )
     return response.results.map((species: any, index: number) => ({
       id: index + 1,
       name: species.name,
-      url: species.url
+      url: species.url,
     }))
   }
 
   async getPokemonDetails(pokemonId: number): Promise<CompletePokemon> {
     const [pokemonData, speciesData] = await Promise.all([
       this.fetchWithCache(`${this.baseUrl}/pokemon/${pokemonId}`),
-      this.fetchWithCache(`${this.baseUrl}/pokemon-species/${pokemonId}`)
+      this.fetchWithCache(`${this.baseUrl}/pokemon-species/${pokemonId}`),
     ])
 
     // Extract generation number from URL
@@ -74,29 +76,31 @@ class PokemonAPIService {
       name: pokemonData.name,
       sprites: pokemonData.sprites,
       types: pokemonData.types,
-      generation: generationId
+      generation: generationId,
     }
   }
 
   async getAllPokemonByGeneration(): Promise<Map<number, CompletePokemon[]>> {
     const allSpecies = await this.getAllPokemonSpecies()
     const pokemonByGeneration = new Map<number, CompletePokemon[]>()
-    
+
     console.log(`🔄 Fetching details for ${allSpecies.length} Pokemon...`)
-    
+
     // Process in batches to avoid overwhelming the API
-    const batchSize = 50
+    const batchSize = 500
     for (let i = 0; i < allSpecies.length; i += batchSize) {
       const batch = allSpecies.slice(i, i + batchSize)
-      
-      console.log(`📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(allSpecies.length / batchSize)}`)
-      
+
+      console.log(
+        `📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(allSpecies.length / batchSize)}`,
+      )
+
       const pokemonDetails = await Promise.all(
-        batch.map(species => this.getPokemonDetails(species.id))
+        batch.map((species) => this.getPokemonDetails(species.id)),
       )
 
       // Group by generation
-      pokemonDetails.forEach(pokemon => {
+      pokemonDetails.forEach((pokemon) => {
         if (!pokemonByGeneration.has(pokemon.generation)) {
           pokemonByGeneration.set(pokemon.generation, [])
         }
@@ -105,7 +109,7 @@ class PokemonAPIService {
 
       // Small delay between batches to be respectful to the API
       if (i + batchSize < allSpecies.length) {
-        await new Promise(resolve => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
 
