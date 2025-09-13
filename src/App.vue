@@ -6,7 +6,7 @@ import {
   KeyIcon,
   CloudIcon,
   CheckIcon,
-  Bars3Icon
+  Bars3Icon,
 } from '@heroicons/vue/24/outline'
 
 import AppHeader from './components/AppHeader.vue'
@@ -34,24 +34,24 @@ const pageNavigation = computed(() => {
   const pokemon = pokemonStore.filteredPokemon
   const pages = []
   const itemsPerPage = 16 // 4x4 grid
-  
+
   for (let i = 0; i < pokemon.length; i += itemsPerPage) {
     const page = pokemon.slice(i, i + itemsPerPage)
     const startId = page[0]?.id || 0
     const endId = page[page.length - 1]?.id || 0
-    const collected = page.filter(p => pokemonStore.collectionStatus[p.id]).length
+    const collected = page.filter((p) => pokemonStore.collectionStatus[p.id]).length
     const total = page.length
     const percentage = total > 0 ? Math.round((collected / total) * 100) : 0
-    
+
     pages.push({
       startId,
       endId,
       collected,
       total,
-      percentage
+      percentage,
     })
   }
-  
+
   return pages
 })
 
@@ -63,7 +63,7 @@ const formatSyncTime = (date: Date) => {
 onMounted(async () => {
   // Initialize sprite configuration from localStorage
   spriteConfig.loadConfig()
-  
+
   // Initialize Pokemon services
   await pokemonServices.initializeServices()
 })
@@ -85,14 +85,14 @@ const scrollToPage = (pageNumber: number) => {
   if (virtualGridRef.value?.scrollToPage) {
     console.log(`🎯 Scrolling to page ${pageNumber}`)
     virtualGridRef.value.scrollToPage(pageNumber)
-    
+
     // Force refresh after a short delay to ensure rendering
     setTimeout(() => {
       if (virtualGridRef.value?.forceRefresh) {
         virtualGridRef.value.forceRefresh()
       }
     }, 100)
-    
+
     // Close sidebar on mobile after navigation
     if (window.innerWidth < 1024) {
       sidebarOpen.value = false
@@ -105,7 +105,7 @@ const scrollToPage = (pageNumber: number) => {
   <div id="app" class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
     <!-- Header -->
     <AppHeader />
-    
+
     <!-- Main Layout with Sidebar -->
     <div class="flex pt-4">
       <!-- Mobile Sidebar Toggle -->
@@ -117,12 +117,14 @@ const scrollToPage = (pageNumber: number) => {
       </button>
 
       <!-- Side Navigation Menu -->
-      <aside 
+      <aside
         class="w-64 min-h-screen bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 fixed left-0 top-16 z-30 transition-transform duration-300 lg:translate-x-0"
         :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }"
       >
         <div class="p-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Page Access</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Quick Page Access
+          </h3>
           <div class="space-y-2 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <!-- Page navigation buttons -->
             <button
@@ -131,9 +133,15 @@ const scrollToPage = (pageNumber: number) => {
               @click="scrollToPage(index + 1)"
               class="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-pokemon-300 dark:hover:border-pokemon-400 transition-all duration-200"
             >
-              <div class="font-medium text-sm text-gray-900 dark:text-gray-100">Page {{ index + 1 }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">#{{ page.startId }}-{{ page.endId }}</div>
-              <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ page.collected }}/{{ page.total }} collected</div>
+              <div class="font-medium text-sm text-gray-900 dark:text-gray-100">
+                Page {{ index + 1 }}
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                #{{ page.startId }}-{{ page.endId }}
+              </div>
+              <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                {{ page.collected }}/{{ page.total }} collected
+              </div>
               <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1 mt-2">
                 <div
                   class="bg-pokemon-600 h-1 rounded-full transition-all duration-300"
@@ -141,22 +149,25 @@ const scrollToPage = (pageNumber: number) => {
                 ></div>
               </div>
             </button>
-            
+
             <!-- Empty state when no data -->
-            <div v-if="pageNavigation.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+            <div
+              v-if="pageNavigation.length === 0"
+              class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"
+            >
               Loading pages...
             </div>
           </div>
         </div>
       </aside>
-      
+
       <!-- Sidebar Overlay for Mobile -->
       <div
         v-if="sidebarOpen"
         @click="sidebarOpen = false"
         class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
       ></div>
-      
+
       <!-- Main Content Area -->
       <main class="flex-1 lg:ml-64">
         <!-- Error State -->
@@ -168,19 +179,12 @@ const scrollToPage = (pageNumber: number) => {
             <div class="flex">
               <ExclamationTriangleIcon class="h-5 w-5 text-red-400" />
               <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">
-                  Failed to load Pokemon data
-                </h3>
+                <h3 class="text-sm font-medium text-red-800">Failed to load Pokemon data</h3>
                 <div class="mt-2 text-sm text-red-700">
                   {{ pokemonServices.initError.value }}
                 </div>
                 <div class="mt-4">
-                  <button
-                    @click="retry"
-                    class="btn-primary"
-                  >
-                    Retry
-                  </button>
+                  <button @click="retry" class="btn-primary">Retry</button>
                 </div>
               </div>
             </div>
@@ -193,24 +197,18 @@ const scrollToPage = (pageNumber: number) => {
     </div>
 
     <!-- Auth Modal -->
-        <!-- Error Modal -->
-    <VueFinalModal
-      v-model="showErrorModal"
-      classes="modal-container"
-      content-class="modal-content"
-    >
+    <!-- Error Modal -->
+    <VueFinalModal v-model="showErrorModal" classes="modal-container" content-class="modal-content">
       <div class="p-6">
         <div class="flex items-center gap-3 mb-4">
           <ExclamationTriangleIcon class="h-6 w-6 text-red-500" />
-          <h3 class="text-lg font-semibold text-gray-900">
-            Service Error
-          </h3>
+          <h3 class="text-lg font-semibold text-gray-900">Service Error</h3>
         </div>
-        
+
         <p class="text-gray-600 mb-6">
           {{ pokemonServices.initError.value }}
         </p>
-        
+
         <div class="flex justify-end gap-3">
           <button
             @click="showErrorModal = false"
@@ -229,10 +227,7 @@ const scrollToPage = (pageNumber: number) => {
     </VueFinalModal>
 
     <!-- Floating Action Button for Auth -->
-    <div
-      v-if="!pokemonStore.isAuthenticated && !showAuthModal"
-      class="fixed bottom-6 right-6"
-    >
+    <div v-if="!pokemonStore.isAuthenticated && !showAuthModal" class="fixed bottom-6 right-6">
       <button
         @click="showAuthModal = true"
         class="bg-pokemon-600 text-white p-4 rounded-full shadow-lg hover:bg-pokemon-700 hover:shadow-xl transition-all duration-300"

@@ -3,19 +3,16 @@
     :data-pokemon-id="pokemon.id"
     :class="[
       'pokemon-card',
-      { 
-        'collected': isCollected,
-        'uncaught': !isCollected,
-        'filtered-out': isFilteredOut
-      }
+      {
+        collected: isCollected,
+        uncaught: !isCollected,
+        'filtered-out': isFilteredOut,
+      },
     ]"
     @click="toggleCollection"
   >
     <!-- Collection Status Indicator -->
-    <div
-      v-if="isCollected"
-      class="absolute top-2 right-2 z-10"
-    >
+    <div v-if="isCollected" class="absolute top-2 right-2 z-10">
       <div class="bg-green-500 rounded-full p-1">
         <CheckIcon class="h-4 w-4 text-white" />
       </div>
@@ -54,7 +51,7 @@
           :key="type.type.name"
           :class="[
             'px-1.5 py-0.5 rounded-full text-xs font-medium text-white',
-            getTypeColorClass(type.type.name)
+            getTypeColorClass(type.type.name),
           ]"
         >
           {{ formatTypeName(type.type.name) }}
@@ -63,7 +60,9 @@
 
       <!-- Generation Badge -->
       <div class="flex justify-center">
-        <span class="generation-badge bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs px-1.5 py-0.5">
+        <span
+          class="generation-badge bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs px-1.5 py-0.5"
+        >
           {{ generationInfo?.name }}
         </span>
       </div>
@@ -78,17 +77,13 @@
     </div>
 
     <!-- Hover Tooltip -->
-    <FloatingVue
-      v-model="showTooltip"
-      :distance="12"
-      placement="top"
-    >
+    <FloatingVue v-model="showTooltip" :distance="12" placement="top">
       <template #popper>
         <div class="bg-gray-900 text-white p-3 rounded-lg shadow-lg max-w-xs">
           <div class="font-bold text-center mb-2">
             {{ formatPokemonName(pokemon.name) }} #{{ pokemon.id }}
           </div>
-          
+
           <div class="grid grid-cols-2 gap-2 text-sm">
             <div>
               <span class="text-gray-300">Height:</span>
@@ -135,7 +130,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isFilteredOut: false
+  isFilteredOut: false,
 })
 
 const pokemonStore = usePokemonStore()
@@ -149,36 +144,34 @@ const showTooltip = ref(false)
 // Computed properties
 const isCollected = computed(() => pokemonStore.isCollected(props.pokemon.id))
 
-const generationInfo = computed(() => 
-  pokemonStore.getGenerationForPokemon(props.pokemon.id)
-)
+const generationInfo = computed(() => pokemonStore.getGenerationForPokemon(props.pokemon.id))
 
 // Get the sprite URL using the configuration
 const spriteUrl = computed(() => {
   const url = spriteConfig.getPokemonSpriteUrl(props.pokemon)
-  
+
   // Debug logging for Pokemon ID 1
   if (props.pokemon.id === 1) {
     console.log(`🎯 PokemonCard computed spriteUrl for ${props.pokemon.name}:`, {
       url,
       selectedStyle: spriteConfig.selectedStyle,
       showShinyVariants: spriteConfig.showShinyVariants,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
   }
-  
+
   return url
 })
 
 // Create a reactive key that changes when sprite config changes
 const imageKey = computed(() => {
   const key = `${props.pokemon.id}-${spriteConfig.selectedStyle}-${spriteConfig.showShinyVariants}`
-  
+
   // Debug logging for Pokemon ID 1
   if (props.pokemon.id === 1) {
     console.log(`🔑 PokemonCard imageKey for ${props.pokemon.name}:`, key)
   }
-  
+
   return key
 })
 
@@ -190,14 +183,14 @@ const toggleCollection = async () => {
 
   console.log(`🎯 Pokemon #${props.pokemon.id} clicked - Online mode: ${isOnlineMode.value}`)
   isLoading.value = true
-  
+
   try {
     // Create sync callback if online
-    const syncCallback = isOnlineMode.value 
+    const syncCallback = isOnlineMode.value
       ? async (id: number, isCollected: boolean) => {
           console.log(`📤 Syncing Pokemon #${id} to Google Sheets...`)
           const result = await syncPokemonToSheets(id, isCollected)
-          
+
           if (!result.success) {
             console.warn(`❌ Sync failed for Pokemon #${id}:`, result.error)
           } else {
@@ -211,7 +204,7 @@ const toggleCollection = async () => {
     }
 
     await pokemonStore.togglePokemonCollected(props.pokemon.id, syncCallback)
-    
+
     // Add visual feedback
     const card = document.querySelector(`[data-pokemon-id="${props.pokemon.id}"]`)
     if (card) {
@@ -230,20 +223,20 @@ const toggleCollection = async () => {
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   const currentSrc = img.src
-  
+
   // First, try official artwork if we're not already using it
   const officialArtwork = props.pokemon.sprites.other?.['official-artwork']?.front_default
   if (officialArtwork && currentSrc !== officialArtwork) {
     img.src = officialArtwork
     return
   }
-  
+
   // Then fallback to front_default if different
   if (currentSrc !== props.pokemon.sprites.front_default) {
     img.src = props.pokemon.sprites.front_default
     return
   }
-  
+
   // Finally use a placeholder if even front_default fails
   img.src = '/pokemon-placeholder.svg'
 }
@@ -258,12 +251,12 @@ const formatTypeName = (type: string) => {
 
 const formatStatName = (statName: string) => {
   const statMap: Record<string, string> = {
-    'hp': 'HP',
-    'attack': 'Attack',
-    'defense': 'Defense',
+    hp: 'HP',
+    attack: 'Attack',
+    defense: 'Defense',
     'special-attack': 'Sp. Atk',
     'special-defense': 'Sp. Def',
-    'speed': 'Speed'
+    speed: 'Speed',
   }
   return statMap[statName] || statName
 }
@@ -287,9 +280,9 @@ const getTypeColorClass = (type: string) => {
     dragon: 'bg-indigo-700',
     dark: 'bg-gray-800',
     steel: 'bg-gray-500',
-    fairy: 'bg-pink-300'
+    fairy: 'bg-pink-300',
   }
-  
+
   return typeColorMap[type] || 'bg-gray-400'
 }
 </script>
@@ -316,16 +309,21 @@ const getTypeColorClass = (type: string) => {
 }
 
 @keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    transform: translate3d(0,0,0) scale(1.02);
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    transform: translate3d(0, 0, 0) scale(1.02);
   }
-  40%, 43% {
-    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+  40%,
+  43% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
     transform: translate3d(0, -8px, 0) scale(1.02);
   }
   70% {
-    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
     transform: translate3d(0, -4px, 0) scale(1.02);
   }
   90% {

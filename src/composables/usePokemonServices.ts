@@ -75,6 +75,9 @@ export function usePokemonServices() {
   // Current session state
   const accessToken = ref<string | null>(savedAuthState.value.accessToken)
   const userCredential = ref<any>(savedAuthState.value.userCredential)
+  
+  // Add flag to prevent multiple simultaneous refresh attempts
+  const isRefreshing = ref(false)
 
   const loadSampleData = () => {
     console.log('Loading sample Pokemon data...')
@@ -342,55 +345,89 @@ export function usePokemonServices() {
   }
 
   const refreshAccessToken = async (): Promise<boolean> => {
-    return new Promise((resolve) => {
-      if (!userCredential.value) {
-        console.log('❌ No user credential available for token refresh')
-        resolve(false)
-        return
-      }
+    // Prevent multiple simultaneous refresh attempts
+    if (isRefreshing.value) {
+      console.log('🔄 Token refresh already in progress, skipping...')
+      return false
+    }
 
-      console.log('🔄 Attempting silent token refresh...')
+    isRefreshing.value = true
+    
+    try {
+      return new Promise((resolve) => {
+        if (!userCredential.value) {
+          console.log('❌ No user credential available for token refresh')
+          resolve(false)
+          return
+        }
 
-      const tokenClient = window.google!.accounts.oauth2.initTokenClient({
-        client_id: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID,
-        scope:
-          'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
-        include_granted_scopes: true,
-        callback: (tokenResponse: any) => {
-          if (tokenResponse.access_token) {
-            console.log('✅ Access token refreshed silently')
-            accessToken.value = tokenResponse.access_token
+        console.log('🔄 Attempting silent token refresh...')
 
-            // Set the new token for gapi client
-            if (window.gapi?.client) {
-              window.gapi.client.setToken({ access_token: tokenResponse.access_token })
+        // Set a timeout to prevent hanging
+        const timeoutId = setTimeout(() => {
+          console.log('⏰ Token refresh timed out after 10 seconds')
+          resolve(false)
+        }, 10000)
+
+        const tokenClient = window.google!.accounts.oauth2.initTokenClient({
+          client_id: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID,
+          scope:
+            'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+          include_granted_scopes: true,
+          callback: (tokenResponse: any) => {
+            clearTimeout(timeoutId)
+            
+            if (tokenResponse.access_token) {
+              console.log('✅ Access token refreshed silently')
+              accessToken.value = tokenResponse.access_token
+
+              // Set the new token for gapi client
+              if (window.gapi?.client) {
+                window.gapi.client.setToken({ access_token: tokenResponse.access_token })
+              }
+
+              // Update saved authentication state
+              savedAuthState.value = {
+                accessToken: tokenResponse.access_token,
+                refreshToken: tokenResponse.refresh_token || savedAuthState.value.refreshToken,
+                userCredential: userCredential.value,
+                timestamp: Date.now(),
+                expiresIn: tokenResponse.expires_in || 3600,
+              }
+
+              resolve(true)
+            } else if (tokenResponse.error) {
+              console.log('❌ Silent token refresh failed:', tokenResponse.error)
+              resolve(false)
+            } else {
+              console.log('❌ Silent token refresh failed - no token received')
+              resolve(false)
             }
+          },
+        })
 
-            // Update saved authentication state
-            savedAuthState.value = {
-              accessToken: tokenResponse.access_token,
-              refreshToken: tokenResponse.refresh_token || savedAuthState.value.refreshToken,
-              userCredential: userCredential.value,
-              timestamp: Date.now(),
-              expiresIn: tokenResponse.expires_in || 3600,
-            }
-
-            resolve(true)
-          } else {
-            console.log('❌ Silent token refresh failed')
-            resolve(false)
-          }
-        },
+        // Try to request the token silently (without showing popup)
+        try {
+          tokenClient.requestAccessToken({ prompt: '' })
+        } catch (error) {
+          clearTimeout(timeoutId)
+          console.log('❌ Error requesting access token:', error)
+          resolve(false)
+        }
       })
-
-      // Try to request the token silently (without showing popup)
-      // If user has already granted permissions, this should work without popup
-      tokenClient.requestAccessToken({ prompt: '' })
-    })
+    } finally {
+      isRefreshing.value = false
+    }
   }
 
   // New function to attempt automatic token refresh using existing credentials
   const attemptSilentReauth = async (): Promise<boolean> => {
+    // Prevent multiple simultaneous reauth attempts
+    if (isRefreshing.value) {
+      console.log('🔇 Silent reauth already in progress, skipping...')
+      return false
+    }
+    
     if (!savedAuthState.value.userCredential || !savedAuthState.value.accessToken) {
       console.log('🔇 No stored credentials available for silent reauth')
       return false
@@ -418,7 +455,26 @@ export function usePokemonServices() {
 
     // Token is expired, try to refresh silently
     console.log('🔄 Token expired, attempting silent refresh...')
-    return await refreshAccessToken()
+    const refreshSuccess = await refreshAccessToken()
+    
+    if (!refreshSuccess) {
+      console.log('🗑️ Token refresh failed, clearing saved authentication state...')
+      // Clear saved auth state if refresh fails
+      savedAuthState.value = {
+        accessToken: null,
+        refreshToken: null,
+        userCredential: null,
+        timestamp: null,
+        expiresIn: 3600,
+      }
+      accessToken.value = null
+      userCredential.value = null
+      pokemonStore.setAuthenticated(false)
+      isOnlineMode.value = false
+      syncStatus.value = 'Authentication expired - Please sign in again'
+    }
+    
+    return refreshSuccess
   }
 
   const restoreAuthenticationState = async () => {

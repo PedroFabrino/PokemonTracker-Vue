@@ -20,7 +20,7 @@ Visit the live application: [PokemonTracker](https://pedrofabrino.github.io/Poke
 
 ### Prerequisites
 
-- Node.js 20+ 
+- Node.js 20+
 - npm or yarn
 - Google account (for cloud sync)
 
@@ -119,7 +119,7 @@ The project includes automated GitHub Pages deployment via GitHub Actions. To de
 ## 🏗️ Architecture
 
 - **Vue 3** with Composition API
-- **TypeScript** for type safety  
+- **TypeScript** for type safety
 - **Vite** for fast development and building
 - **Tailwind CSS** for styling
 - **Pinia** for state management
