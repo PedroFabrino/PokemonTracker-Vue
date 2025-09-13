@@ -2,8 +2,7 @@
   <header
     ref="headerRef"
     :class="[
-      'sticky-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm',
-      { 'header-hidden': isHidden },
+      'sticky-header bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700 transition-all duration-300',
     ]"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -212,9 +211,7 @@ const { signIn, signOut, renderGoogleSignInButton } = usePokemonServices()
 
 // Header visibility state
 const headerRef = ref<HTMLElement>()
-const isHidden = ref(false)
-const lastScrollY = ref(0)
-const scrollThreshold = 10
+// Header no longer hides on scroll
 
 // Search state
 const searchQuery = ref('')
@@ -255,27 +252,6 @@ const handleSignIn = async () => {
 
 const handleSignOut = async () => {
   await signOut()
-}
-
-// Auto-hide header on scroll
-const handleScroll = () => {
-  if (!headerRef.value) return
-
-  const currentScrollY = window.scrollY
-
-  if (Math.abs(currentScrollY - lastScrollY.value) < scrollThreshold) {
-    return
-  }
-
-  if (currentScrollY > lastScrollY.value && currentScrollY > 100) {
-    // Scrolling down - hide header
-    isHidden.value = true
-  } else {
-    // Scrolling up - show header
-    isHidden.value = false
-  }
-
-  lastScrollY.value = currentScrollY
 }
 
 // Search functionality
@@ -378,8 +354,6 @@ const getGenerationName = (pokemonId: number) => {
 
 // Lifecycle
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-
   // Initialize filters from store
   searchQuery.value = pokemonStore.filters.searchQuery
   selectedGeneration.value = pokemonStore.filters.selectedGeneration || ''
@@ -394,7 +368,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  // Clean up scroll listener removed - header no longer hides
 })
 </script>
 
@@ -404,10 +378,6 @@ onUnmounted(() => {
   top: 0;
   z-index: 40;
   transition: transform 0.3s ease-in-out;
-}
-
-.header-hidden {
-  transform: translateY(-100%);
 }
 
 .autocomplete-item:hover {
