@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: 'class', // Enable dark mode with class strategy
   theme: {
     extend: {
@@ -44,15 +41,13 @@ export default {
         normal: '#9B9B9B',
       },
       gridTemplateColumns: {
-        'binder': 'repeat(4, 1fr)', // 4x4 Pokemon binder grid
+        binder: 'repeat(4, 1fr)', // 4x4 Pokemon binder grid
         'auto-fit-cards': 'repeat(auto-fit, minmax(200px, 1fr))',
       },
       aspectRatio: {
-        'card': '3/4', // Pokemon card aspect ratio
-      }
+        card: '3/4', // Pokemon card aspect ratio
+      },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require('@tailwindcss/typography')],
 }

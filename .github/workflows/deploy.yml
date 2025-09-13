@@ -24,38 +24,38 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
-    environment: github-pages  # Add this if secrets are in environment
+    environment: github-pages # Add this if secrets are in environment
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Debug environment variables
         run: |
           echo "Google OAuth Client ID is set: ${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID != '' }}"
           echo "Google API Key is set: ${{ secrets.VITE_GOOGLE_API_KEY != '' }}"
         env:
-          VITE_GOOGLE_OAUTH_CLIENT_ID: "${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}"
-          VITE_GOOGLE_API_KEY: "${{ secrets.VITE_GOOGLE_API_KEY }}"
-        
+          VITE_GOOGLE_OAUTH_CLIENT_ID: '${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}'
+          VITE_GOOGLE_API_KEY: '${{ secrets.VITE_GOOGLE_API_KEY }}'
+
       - name: Build
         run: npm run build
         env:
           # Add your Google OAuth Client ID and API Key as GitHub secrets
-          VITE_GOOGLE_OAUTH_CLIENT_ID: "${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}"
-          VITE_GOOGLE_API_KEY: "${{ secrets.VITE_GOOGLE_API_KEY }}"
-          
+          VITE_GOOGLE_OAUTH_CLIENT_ID: '${{ secrets.VITE_GOOGLE_OAUTH_CLIENT_ID }}'
+          VITE_GOOGLE_API_KEY: '${{ secrets.VITE_GOOGLE_API_KEY }}'
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
