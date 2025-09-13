@@ -5,20 +5,20 @@
 /* Custom Pokemon Card Styles */
 @layer components {
   .pokemon-card {
-    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-gray-200 hover:border-pokemon-400 relative overflow-hidden;
+    @apply bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-gray-200 dark:border-gray-600 hover:border-pokemon-400 dark:hover:border-pokemon-500 relative overflow-hidden;
   }
   
   .pokemon-card.collected {
-    @apply bg-gradient-to-br from-green-50 to-green-100 border-green-400 shadow-green-200;
+    @apply bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 border-green-400 dark:border-green-500 shadow-green-200 dark:shadow-green-700;
   }
   
   .pokemon-card.uncaught {
-    @apply opacity-50 grayscale border-gray-300;
+    @apply opacity-50 grayscale border-gray-300 dark:border-gray-600;
     filter: contrast(0.75) brightness(0.75) grayscale(0.5);
   }
   
   .pokemon-card.uncaught:hover {
-    @apply opacity-75 border-gray-400 transition-all duration-200;
+    @apply opacity-75 border-gray-400 dark:border-gray-500 transition-all duration-200;
     filter: contrast(0.9) brightness(0.9) grayscale(0.2);
   }
   
@@ -44,7 +44,7 @@
   }
   
   .binder-page-section {
-    @apply grid grid-cols-4 gap-4 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-inner mb-8 border border-gray-200;
+    @apply grid grid-cols-4 gap-4 p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-inner mb-8 border border-gray-200 dark:border-gray-600;
   }
   
   .binder-page {
@@ -72,7 +72,7 @@
   }
   
   .autocomplete-dropdown {
-    @apply absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto hidden;
+    @apply absolute top-full left-0 right-0 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto hidden;
   }
   
   .autocomplete-dropdown.show {
@@ -80,7 +80,7 @@
   }
   
   .autocomplete-item {
-    @apply p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-3;
+    @apply p-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-600 last:border-b-0 flex items-center gap-3 text-gray-900 dark:text-white;
   }
   
   .scroll-nav-btn {
@@ -88,7 +88,7 @@
   }
   
   .autocomplete-item.highlighted {
-    @apply bg-pokemon-50 border-pokemon-200;
+    @apply bg-pokemon-50 dark:bg-pokemon-900 border-pokemon-200 dark:border-pokemon-700;
   }
   
   .generation-badge {
@@ -159,11 +159,11 @@ html {
 
 /* Filter styles */
 .filter-input {
-  @apply px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pokemon-500 focus:border-pokemon-500 outline-none transition-colors;
+  @apply px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-pokemon-500 focus:border-pokemon-500 dark:focus:border-pokemon-400 outline-none transition-colors;
 }
 
 .filter-select {
-  @apply px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-pokemon-500 focus:border-pokemon-500 outline-none transition-colors;
+  @apply px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-pokemon-500 focus:border-pokemon-500 dark:focus:border-pokemon-400 outline-none transition-colors;
 }
 
 /* Button styles */

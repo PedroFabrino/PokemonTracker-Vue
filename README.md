@@ -46,7 +46,38 @@ npm install
 npm run dev
 ```
 
-## 📋 Available Scripts
+## � Deployment
+
+The project is configured with GitHub Actions for automatic deployment to GitHub Pages.
+
+### Automatic Deployment
+
+- **Trigger**: Push to `main` branch
+- **Destination**: GitHub Pages
+- **URL**: `https://pedrofabrino.github.io/PokemonTracker-Vue/`
+
+### Setup GitHub Secrets
+
+For the app to work properly in production, you need to set up the following GitHub repository secrets:
+
+1. Go to your repository settings
+2. Navigate to "Secrets and variables" > "Actions"
+3. Add the following secrets:
+   - `VITE_GOOGLE_OAUTH_CLIENT_ID`: Your Google OAuth 2.0 Client ID
+   - `VITE_GOOGLE_API_KEY`: Your Google API Key
+
+### Manual Deployment
+
+You can also deploy manually:
+
+```bash
+# Build the project
+npm run build
+
+# The dist/ folder contains the built files ready for deployment
+```
+
+## �📋 Available Scripts
 
 ### Development
 

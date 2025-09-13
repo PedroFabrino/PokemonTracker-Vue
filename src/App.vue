@@ -14,10 +14,14 @@ import VirtualPokemonGrid from './components/VirtualPokemonGrid.vue'
 import { usePokemonStore } from './stores/pokemon'
 import { useSpriteConfigStore } from './stores/spriteConfig'
 import { usePokemonServices } from './composables/usePokemonServices'
+import { useTheme } from './composables/useTheme'
 
 const pokemonStore = usePokemonStore()
 const spriteConfig = useSpriteConfigStore()
 const pokemonServices = usePokemonServices()
+
+// Initialize theme system
+const theme = useTheme()
 
 // Local state
 const showAuthModal = ref(false)
@@ -98,7 +102,7 @@ const scrollToPage = (pageNumber: number) => {
 </script>
 
 <template>
-  <div id="app" class="min-h-screen bg-gray-50">
+  <div id="app" class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
     <!-- Header -->
     <AppHeader />
     
@@ -114,23 +118,23 @@ const scrollToPage = (pageNumber: number) => {
 
       <!-- Side Navigation Menu -->
       <aside 
-        class="w-64 min-h-screen bg-white shadow-sm border-r border-gray-200 fixed left-0 top-16 z-30 transition-transform duration-300 lg:translate-x-0"
+        class="w-64 min-h-screen bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 fixed left-0 top-16 z-30 transition-transform duration-300 lg:translate-x-0"
         :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }"
       >
         <div class="p-4">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Page Access</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Page Access</h3>
           <div class="space-y-2 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <!-- Page navigation buttons -->
             <button
               v-for="(page, index) in pageNavigation"
               :key="`page-${index}`"
               @click="scrollToPage(index + 1)"
-              class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-pokemon-300 transition-all duration-200"
+              class="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-pokemon-300 dark:hover:border-pokemon-400 transition-all duration-200"
             >
-              <div class="font-medium text-sm text-gray-900">Page {{ index + 1 }}</div>
-              <div class="text-xs text-gray-500">#{{ page.startId }}-{{ page.endId }}</div>
-              <div class="text-xs text-gray-600 mt-1">{{ page.collected }}/{{ page.total }} collected</div>
-              <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+              <div class="font-medium text-sm text-gray-900 dark:text-gray-100">Page {{ index + 1 }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">#{{ page.startId }}-{{ page.endId }}</div>
+              <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ page.collected }}/{{ page.total }} collected</div>
+              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1 mt-2">
                 <div
                   class="bg-pokemon-600 h-1 rounded-full transition-all duration-300"
                   :style="{ width: `${page.percentage}%` }"
@@ -139,7 +143,7 @@ const scrollToPage = (pageNumber: number) => {
             </button>
             
             <!-- Empty state when no data -->
-            <div v-if="pageNavigation.length === 0" class="text-sm text-gray-500 text-center py-4">
+            <div v-if="pageNavigation.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
               Loading pages...
             </div>
           </div>

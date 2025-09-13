@@ -24,20 +24,22 @@ class PokemonWorker {
     // Get total count first
     const initialResponse = await this.fetchWithCache(`${this.baseUrl}/pokemon-species?limit=1`)
     const totalCount = initialResponse.count
-    
+
     // Fetch all species
-    const response = await this.fetchWithCache(`${this.baseUrl}/pokemon-species?limit=${totalCount}`)
+    const response = await this.fetchWithCache(
+      `${this.baseUrl}/pokemon-species?limit=${totalCount}`,
+    )
     return response.results.map((species, index) => ({
       id: index + 1,
       name: species.name,
-      url: species.url
+      url: species.url,
     }))
   }
 
   async getPokemonDetails(pokemonId) {
     const [pokemonData, speciesData] = await Promise.all([
       this.fetchWithCache(`${this.baseUrl}/pokemon/${pokemonId}`),
-      this.fetchWithCache(`${this.baseUrl}/pokemon-species/${pokemonId}`)
+      this.fetchWithCache(`${this.baseUrl}/pokemon-species/${pokemonId}`),
     ])
 
     // Extract generation number from URL
@@ -51,9 +53,11 @@ class PokemonWorker {
         front_default: pokemonData.sprites.front_default,
         other: {
           'official-artwork': {
-            front_default: pokemonData.sprites.other?.['official-artwork']?.front_default || pokemonData.sprites.front_default
-          }
-        }
+            front_default:
+              pokemonData.sprites.other?.['official-artwork']?.front_default ||
+              pokemonData.sprites.front_default,
+          },
+        },
       },
       types: pokemonData.types,
       height: pokemonData.height,
@@ -63,46 +67,46 @@ class PokemonWorker {
       stats: pokemonData.stats,
       species: {
         name: pokemonData.name,
-        url: `https://pokeapi.co/api/v2/pokemon-species/${pokemonData.id}/`
+        url: `https://pokeapi.co/api/v2/pokemon-species/${pokemonData.id}/`,
       },
-      generation: generationId
+      generation: generationId,
     }
   }
 
   async loadAllPokemon() {
     try {
       const allSpecies = await this.getAllPokemonSpecies()
-      
+
       // Send progress update
       self.postMessage({
         type: 'progress',
         data: {
           message: `Found ${allSpecies.length} Pokemon. Starting to load details...`,
           progress: 0,
-          total: allSpecies.length
-        }
+          total: allSpecies.length,
+        },
       })
 
       const allPokemon = []
-      
+
       // Use larger batch size since we're in a worker and can be more aggressive
-      const batchSize = 100
-      
+      const batchSize = 500
+
       for (let i = 0; i < allSpecies.length; i += batchSize) {
         const batch = allSpecies.slice(i, i + batchSize)
-        
+
         // Send progress update
         self.postMessage({
           type: 'progress',
           data: {
             message: `Loading batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(allSpecies.length / batchSize)}...`,
             progress: i,
-            total: allSpecies.length
-          }
+            total: allSpecies.length,
+          },
         })
-        
+
         const pokemonDetails = await Promise.all(
-          batch.map(species => this.getPokemonDetails(species.id))
+          batch.map((species) => this.getPokemonDetails(species.id)),
         )
 
         allPokemon.push(...pokemonDetails)
@@ -113,13 +117,13 @@ class PokemonWorker {
           data: {
             pokemon: pokemonDetails,
             progress: i + batch.length,
-            total: allSpecies.length
-          }
+            total: allSpecies.length,
+          },
         })
 
-        // Smaller delay since we're in a worker
+        // Smaller delay since we're in a worker and using larger batches
         if (i + batchSize < allSpecies.length) {
-          await new Promise(resolve => setTimeout(resolve, 50))
+          await new Promise((resolve) => setTimeout(resolve, 25))
         }
       }
 
@@ -128,17 +132,16 @@ class PokemonWorker {
         type: 'complete',
         data: {
           pokemon: allPokemon,
-          message: 'All Pokemon loaded successfully!'
-        }
+          message: 'All Pokemon loaded successfully!',
+        },
       })
-
     } catch (error) {
       self.postMessage({
         type: 'error',
         data: {
           message: error.message,
-          error: error
-        }
+          error: error,
+        },
       })
     }
   }
@@ -146,9 +149,9 @@ class PokemonWorker {
 
 const worker = new PokemonWorker()
 
-self.onmessage = function(e) {
+self.onmessage = function (e) {
   const { type } = e.data
-  
+
   switch (type) {
     case 'load_all_pokemon':
       worker.loadAllPokemon()

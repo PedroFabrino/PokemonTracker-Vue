@@ -43,7 +43,7 @@
     <!-- Pokemon Info -->
     <div class="px-2 pb-2">
       <!-- Name -->
-      <h3 class="font-bold text-gray-900 text-center mb-1 truncate text-sm">
+      <h3 class="font-bold text-gray-900 dark:text-gray-100 text-center mb-1 truncate text-sm">
         {{ formatPokemonName(pokemon.name) }}
       </h3>
 
@@ -63,7 +63,7 @@
 
       <!-- Generation Badge -->
       <div class="flex justify-center">
-        <span class="generation-badge bg-gray-100 text-gray-700 text-xs px-1.5 py-0.5">
+        <span class="generation-badge bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs px-1.5 py-0.5">
           {{ generationInfo?.name }}
         </span>
       </div>
@@ -72,7 +72,7 @@
     <!-- Loading State -->
     <div
       v-if="isLoading"
-      class="absolute inset-0 bg-white/80 flex items-center justify-center"
+      class="absolute inset-0 bg-white/80 dark:bg-gray-700/80 flex items-center justify-center"
     >
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pokemon-600"></div>
     </div>

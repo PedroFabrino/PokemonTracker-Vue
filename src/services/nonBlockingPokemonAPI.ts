@@ -28,7 +28,7 @@ class NonBlockingPokemonAPI {
 
   // Yield control back to browser to prevent UI blocking
   private async yieldToBrowser(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if ('requestIdleCallback' in window) {
         requestIdleCallback(() => resolve(), { timeout: 50 })
       } else {
@@ -41,20 +41,22 @@ class NonBlockingPokemonAPI {
     // Get total count first
     const initialResponse = await this.fetchWithCache(`${this.baseUrl}/pokemon-species?limit=1`)
     const totalCount = initialResponse.count
-    
+
     // Fetch all species
-    const response = await this.fetchWithCache(`${this.baseUrl}/pokemon-species?limit=${totalCount}`)
+    const response = await this.fetchWithCache(
+      `${this.baseUrl}/pokemon-species?limit=${totalCount}`,
+    )
     return response.results.map((species: any, index: number) => ({
       id: index + 1,
       name: species.name,
-      url: species.url
+      url: species.url,
     }))
   }
 
   async getPokemonDetails(pokemonId: number): Promise<Pokemon> {
     const [pokemonData, speciesData] = await Promise.all([
       this.fetchWithCache(`${this.baseUrl}/pokemon/${pokemonId}`),
-      this.fetchWithCache(`${this.baseUrl}/pokemon-species/${pokemonId}`)
+      this.fetchWithCache(`${this.baseUrl}/pokemon-species/${pokemonId}`),
     ])
 
     // Extract generation number from URL
@@ -73,8 +75,8 @@ class NonBlockingPokemonAPI {
       stats: pokemonData.stats,
       species: {
         name: pokemonData.name,
-        url: `https://pokeapi.co/api/v2/pokemon-species/${pokemonData.id}/`
-      }
+        url: `https://pokeapi.co/api/v2/pokemon-species/${pokemonData.id}/`,
+      },
     }
   }
 
@@ -82,34 +84,34 @@ class NonBlockingPokemonAPI {
     onProgress?: (progress: PokemonLoadProgress) => void,
     onPartialData?: (pokemon: Pokemon[]) => void,
     onComplete?: (pokemon: Pokemon[]) => void,
-    onError?: (error: string) => void
+    onError?: (error: string) => void,
   ): Promise<void> {
     try {
       console.log('🎯 Starting non-blocking Pokemon loading...')
-      
+
       const allSpecies = await this.getAllPokemonSpecies()
-      
+
       onProgress?.({
         message: `Found ${allSpecies.length} Pokemon. Starting to load details...`,
         progress: 0,
-        total: allSpecies.length
+        total: allSpecies.length,
       })
 
       const allPokemon: Pokemon[] = []
-      
+
       // Larger batch size for faster downloading, but smaller render batches
-      const batchSize = 50 // Good balance between speed and responsiveness
-      const delayBetweenBatches = 50 // Shorter delay since we're using larger batches
-      
+      const batchSize = 500 // Increased batch size for much faster loading
+      const delayBetweenBatches = 25 // Shorter delay to maintain responsiveness
+
       for (let i = 0; i < allSpecies.length; i += batchSize) {
         const batch = allSpecies.slice(i, i + batchSize)
-        
+
         onProgress?.({
           message: `Loading batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(allSpecies.length / batchSize)}...`,
           progress: i,
-          total: allSpecies.length
+          total: allSpecies.length,
         })
-        
+
         // Process entire batch in parallel for speed
         const batchPokemon = await Promise.all(
           batch.map(async (species) => {
@@ -119,11 +121,11 @@ class NonBlockingPokemonAPI {
               console.warn(`Failed to load Pokemon #${species.id}:`, error)
               return null
             }
-          })
+          }),
         )
 
         // Filter out failed requests
-        const validPokemon = batchPokemon.filter(pokemon => pokemon !== null) as Pokemon[]
+        const validPokemon = batchPokemon.filter((pokemon) => pokemon !== null) as Pokemon[]
         allPokemon.push(...validPokemon)
 
         // Send partial data for UI updates
@@ -132,13 +134,12 @@ class NonBlockingPokemonAPI {
         }
 
         // Yield between batches
-        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches))
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches))
       }
 
       // Sort by ID and send final data
       allPokemon.sort((a, b) => a.id - b.id)
       onComplete?.(allPokemon)
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       onError?.(errorMessage)
