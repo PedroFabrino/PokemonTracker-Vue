@@ -157,6 +157,7 @@ export function usePokemonServices() {
           pokemonStore.setPokemonData(allPokemon)
 
           // Cache the data for future use
+          console.log(`💾 Saving ${allPokemon.length} Pokemon to cache...`)
           pokemonCache.saveToCache(allPokemon)
 
           // Set loading to false here when complete
@@ -953,6 +954,10 @@ export function usePokemonServices() {
     }
   }
 
+  const getCacheInfo = () => {
+    return pokemonCache.getCacheInfo()
+  }
+
   // Expose debug function globally for browser console access
   if (typeof window !== 'undefined') {
     ;(window as any).debugPokemonSync = debugSyncState
@@ -979,6 +984,7 @@ export function usePokemonServices() {
     loadSampleData,
     refreshFromSheets,
     refreshPokemonCache,
+    getCacheInfo,
     debugSyncState,
   }
 }
