@@ -75,7 +75,7 @@ export function usePokemonServices() {
   // Current session state
   const accessToken = ref<string | null>(savedAuthState.value.accessToken)
   const userCredential = ref<any>(savedAuthState.value.userCredential)
-  
+
   // Add flag to prevent multiple simultaneous refresh attempts
   const isRefreshing = ref(false)
 
@@ -352,7 +352,7 @@ export function usePokemonServices() {
     }
 
     isRefreshing.value = true
-    
+
     try {
       return new Promise((resolve) => {
         if (!userCredential.value) {
@@ -376,7 +376,7 @@ export function usePokemonServices() {
           include_granted_scopes: true,
           callback: (tokenResponse: any) => {
             clearTimeout(timeoutId)
-            
+
             if (tokenResponse.access_token) {
               console.log('✅ Access token refreshed silently')
               accessToken.value = tokenResponse.access_token
@@ -427,7 +427,7 @@ export function usePokemonServices() {
       console.log('🔇 Silent reauth already in progress, skipping...')
       return false
     }
-    
+
     if (!savedAuthState.value.userCredential || !savedAuthState.value.accessToken) {
       console.log('🔇 No stored credentials available for silent reauth')
       return false
@@ -456,7 +456,7 @@ export function usePokemonServices() {
     // Token is expired, try to refresh silently
     console.log('🔄 Token expired, attempting silent refresh...')
     const refreshSuccess = await refreshAccessToken()
-    
+
     if (!refreshSuccess) {
       console.log('🗑️ Token refresh failed, clearing saved authentication state...')
       // Clear saved auth state if refresh fails
@@ -473,7 +473,7 @@ export function usePokemonServices() {
       isOnlineMode.value = false
       syncStatus.value = 'Authentication expired - Please sign in again'
     }
-    
+
     return refreshSuccess
   }
 

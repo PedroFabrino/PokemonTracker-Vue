@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { VueFinalModal } from 'vue-final-modal'
 import {
   ExclamationTriangleIcon,
@@ -28,6 +28,21 @@ const showAuthModal = ref(false)
 const showErrorModal = ref(false)
 const sidebarOpen = ref(false)
 const virtualGridRef = ref()
+const showSyncPopup = ref(false)
+
+// Watch for sync time changes and show popup temporarily
+watch(
+  () => pokemonStore.lastSyncTime,
+  (newSyncTime) => {
+    if (newSyncTime) {
+      showSyncPopup.value = true
+      // Hide popup after 3 seconds
+      setTimeout(() => {
+        showSyncPopup.value = false
+      }, 3000)
+    }
+  },
+)
 
 // Page navigation computed property
 const pageNavigation = computed(() => {
@@ -111,21 +126,24 @@ const scrollToPage = (pageNumber: number) => {
       <!-- Mobile Sidebar Toggle -->
       <button
         @click="toggleSidebar"
-        class="lg:hidden fixed top-20 left-4 z-50 bg-white p-2 rounded-lg shadow-md border border-gray-200"
+        class="lg:hidden fixed left-2 z-50 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-md border border-gray-200 dark:border-gray-600 transition-opacity duration-300"
+        :class="{ 'opacity-0 pointer-events-none': sidebarOpen }"
+        style="top: calc(var(--header-height, 64px) + 8px)"
       >
         <Bars3Icon class="h-5 w-5 text-gray-600" />
       </button>
 
       <!-- Side Navigation Menu -->
       <aside
-        class="w-64 min-h-screen bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 fixed left-0 top-16 z-30 transition-transform duration-300 lg:translate-x-0"
+        class="w-64 bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 fixed left-0 z-30 transition-transform duration-300 lg:translate-x-0"
         :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }"
+        style="top: var(--header-height, 64px); height: calc(100vh - var(--header-height, 64px))"
       >
         <div class="p-4">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Quick Page Access
           </h3>
-          <div class="space-y-2 max-h-[calc(100vh-8rem)] overflow-y-auto">
+          <div class="space-y-2 max-h-[calc(100vh-var(--header-height,64px)-8rem)] overflow-y-auto">
             <!-- Page navigation buttons -->
             <button
               v-for="(page, index) in pageNavigation"
@@ -173,7 +191,7 @@ const scrollToPage = (pageNumber: number) => {
         <!-- Error State -->
         <div
           v-if="pokemonServices.initError.value"
-          class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+          class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8"
         >
           <div class="bg-red-50 border border-red-200 rounded-lg p-6">
             <div class="flex">
@@ -237,11 +255,12 @@ const scrollToPage = (pageNumber: number) => {
     </div>
 
     <!-- Sync Status Toast -->
+    <!-- Sync Popup -->
     <div
-      v-if="pokemonStore.lastSyncTime"
-      class="fixed bottom-6 left-6 bg-white rounded-lg shadow-lg p-4 border border-gray-200"
+      v-if="showSyncPopup && pokemonStore.lastSyncTime"
+      class="fixed bottom-6 left-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-600 transition-all duration-300 z-50"
     >
-      <div class="flex items-center gap-2 text-sm text-gray-600">
+      <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
         <CheckIcon class="h-4 w-4 text-green-500" />
         Last sync: {{ formatSyncTime(pokemonStore.lastSyncTime) }}
       </div>
@@ -266,7 +285,7 @@ const scrollToPage = (pageNumber: number) => {
 
 /* Ensure sidebar stays at proper height */
 aside {
-  height: calc(100vh - 4rem);
+  height: calc(100vh - 7rem);
   overflow-y: auto;
 }
 
@@ -279,12 +298,24 @@ aside::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
 
+.dark aside::-webkit-scrollbar-track {
+  background: #374151;
+}
+
 aside::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 2px;
 }
 
+.dark aside::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
 aside::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.dark aside::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 </style>
