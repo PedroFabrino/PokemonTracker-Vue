@@ -45,6 +45,14 @@
               <div>
                 <SpriteConfigMenu />
               </div>
+
+              <!-- Divider -->
+              <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+              <!-- Cache Information -->
+              <div>
+                <CacheInfo />
+              </div>
             </div>
           </div>
 
@@ -68,6 +76,7 @@
 <script setup lang="ts">
 import SpriteConfigMenu from './SpriteConfigMenu.vue'
 import ThemeSettings from './ThemeSettings.vue'
+import CacheInfo from './CacheInfo.vue'
 
 interface Props {
   isOpen: boolean

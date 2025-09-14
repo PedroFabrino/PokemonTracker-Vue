@@ -14,13 +14,15 @@
             <div class="flex-shrink-0">
               <img src="/pokeball.svg" alt="PokemonTracker" class="h-8 w-8" />
             </div>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 hidden-on-cramped">PokemonTracker</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 hidden-on-cramped">
+              PokemonTracker
+            </h1>
           </div>
 
           <!-- Mobile Settings and Auth -->
           <div class="flex items-center gap-2">
             <!-- Collection Stats -->
-            <div 
+            <div
               class="relative text-sm text-gray-600 dark:text-gray-300 cursor-help stats-tooltip-container"
               @click="toggleStatsTooltip"
               @touchstart="toggleStatsTooltip"
