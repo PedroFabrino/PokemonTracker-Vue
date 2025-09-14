@@ -5,8 +5,189 @@
       'sticky-header bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700 transition-all duration-300',
     ]"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+      <!-- Mobile Layout (stacked) -->
+      <div class="sm:hidden">
+        <!-- Top row: Logo and Settings -->
+        <div class="flex items-center justify-between py-3">
+          <div class="flex items-center gap-3">
+            <div class="flex-shrink-0">
+              <img src="/pokeball.svg" alt="PokemonTracker" class="h-8 w-8" />
+            </div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 hidden-on-cramped">PokemonTracker</h1>
+          </div>
+
+          <!-- Mobile Settings and Auth -->
+          <div class="flex items-center gap-2">
+            <!-- Collection Stats -->
+            <div 
+              class="relative text-sm text-gray-600 dark:text-gray-300 cursor-help stats-tooltip-container"
+              @click="toggleStatsTooltip"
+              @touchstart="toggleStatsTooltip"
+            >
+              {{ pokemonStore.collectionStats.collected }} /
+              {{ pokemonStore.collectionStats.total }} ({{
+                pokemonStore.collectionStats.percentage
+              }}%)
+
+              <!-- Generation Breakdown Tooltip -->
+              <div
+                v-if="showStatsTooltip"
+                class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 z-[60] min-w-max"
+              >
+                <div
+                  class="text-center font-semibold mb-3 text-yellow-600 dark:text-yellow-300 border-b border-gray-200 dark:border-gray-600 pb-2"
+                >
+                  Collection by Generation
+                </div>
+                <div class="space-y-2">
+                  <div
+                    v-for="genStat in pokemonStore.collectionStats.byGeneration"
+                    :key="genStat.generation.id"
+                    class="flex justify-between items-center gap-4"
+                  >
+                    <span class="text-gray-300 text-left whitespace-nowrap">
+                      Generation {{ genStat.generation.id }} ({{ genStat.generation.region }}):
+                    </span>
+                    <span
+                      class="font-mono text-white font-semibold text-right whitespace-nowrap"
+                      :class="{
+                        'text-green-400': genStat.percentage >= 90,
+                        'text-yellow-400': genStat.percentage >= 70 && genStat.percentage < 90,
+                        'text-orange-400': genStat.percentage >= 50 && genStat.percentage < 70,
+                        'text-red-400': genStat.percentage < 50,
+                      }"
+                    >
+                      {{ genStat.collected }}/{{ genStat.total }} ({{ genStat.percentage }}%)
+                    </span>
+                  </div>
+                </div>
+                <!-- Arrow pointing up -->
+                <div
+                  class="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-white dark:border-b-gray-800"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Sign In/Out Button -->
+            <button
+              v-if="!pokemonStore.isAuthenticated"
+              @click="signIn"
+              class="text-sm bg-pokemon-600 hover:bg-pokemon-700 text-white px-3 py-1.5 rounded-md transition-colors"
+            >
+              Sign in
+            </button>
+            <button
+              v-else
+              @click="signOut"
+              class="text-sm bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-md transition-colors"
+            >
+              Sign out
+            </button>
+
+            <!-- Settings Button -->
+            <button
+              @click="showSettingsModal = true"
+              class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom row: Search and Filters -->
+        <div class="pb-3 space-y-3">
+          <!-- Search Bar -->
+          <div class="search-container">
+            <div class="relative">
+              <MagnifyingGlassIcon
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+              />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search Pokemon by name or number..."
+                class="w-full py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-pokemon-500 focus:border-pokemon-500 outline-none transition-colors"
+                @input="handleSearchInput"
+                @keydown="handleKeyDown"
+                @focus="showAutocomplete = true"
+                @blur="handleSearchBlur"
+              />
+              <button
+                v-if="searchQuery"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full transition-colors"
+                @click="clearSearch"
+              >
+                <XMarkIcon
+                  class="h-5 w-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                />
+              </button>
+            </div>
+
+            <!-- Autocomplete Dropdown -->
+            <div
+              v-if="showAutocomplete && searchSuggestions.length > 0"
+              class="autocomplete-dropdown show"
+            >
+              <div
+                v-for="(pokemon, index) in searchSuggestions"
+                :key="pokemon.id"
+                :class="['autocomplete-item', { highlighted: index === selectedSuggestionIndex }]"
+                @mousedown="selectPokemon(pokemon)"
+                @mouseenter="selectedSuggestionIndex = index"
+              >
+                <img :src="pokemon.sprites.front_default" :alt="pokemon.name" class="w-8 h-8" />
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900 dark:text-gray-100">
+                    {{ formatPokemonName(pokemon.name) }}
+                  </div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">
+                    #{{ pokemon.id.toString().padStart(3, '0') }} •
+                    {{ getGenerationName(pokemon.id) }}
+                  </div>
+                </div>
+                <div v-if="pokemonStore.isCollected(pokemon.id)" class="text-green-600">
+                  <CheckIcon class="h-5 w-5" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="flex justify-center">
+            <select
+              v-model="selectedGeneration"
+              class="filter-select"
+              @change="handleGenerationChange"
+            >
+              <option value="">All Generations</option>
+              <option
+                v-for="generation in pokemonStore.generations"
+                :key="generation.id"
+                :value="generation.id.toString()"
+              >
+                {{ generation.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Layout (original) -->
+      <div class="hidden sm:flex sm:items-center sm:justify-between gap-4 py-4">
         <!-- Logo and Title -->
         <div class="flex items-center gap-3">
           <div class="flex-shrink-0">
@@ -16,7 +197,7 @@
         </div>
 
         <!-- Search Bar -->
-        <div class="flex-1 max-w-lg mx-8">
+        <div class="flex-1 max-w-lg mx-2 lg:mx-8">
           <div class="search-container">
             <div class="relative">
               <MagnifyingGlassIcon
@@ -74,7 +255,7 @@
         </div>
 
         <!-- Filter Controls -->
-        <div class="flex items-center gap-4">
+        <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
           <!-- Generation Filter -->
           <select
             v-model="selectedGeneration"
@@ -352,11 +533,38 @@ const getGenerationName = (pokemonId: number) => {
   return generation ? `Gen ${generation.id}` : 'Unknown'
 }
 
+const toggleStatsTooltip = () => {
+  showStatsTooltip.value = !showStatsTooltip.value
+}
+
+const handleClickOutside = (event: Event) => {
+  // Close tooltip if clicking outside of it
+  const target = event.target as HTMLElement
+  if (!target.closest('.stats-tooltip-container')) {
+    showStatsTooltip.value = false
+  }
+}
+
 // Lifecycle
 onMounted(() => {
   // Initialize filters from store
   searchQuery.value = pokemonStore.filters.searchQuery
   selectedGeneration.value = pokemonStore.filters.selectedGeneration || ''
+
+  // Set up header height CSS variable
+  const updateHeaderHeight = () => {
+    if (headerRef.value) {
+      const height = headerRef.value.offsetHeight
+      document.documentElement.style.setProperty('--header-height', `${height}px`)
+    }
+  }
+
+  // Update on mount and on resize
+  updateHeaderHeight()
+  window.addEventListener('resize', updateHeaderHeight)
+
+  // Set up click outside listener for mobile tooltip
+  document.addEventListener('click', handleClickOutside)
 
   // Render Google Sign-In button after a short delay to ensure Google scripts are loaded
   setTimeout(() => {
@@ -368,7 +576,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Clean up scroll listener removed - header no longer hides
+  // Clean up resize listener
+  window.removeEventListener('resize', () => {})
+  // Clean up click outside listener
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -427,5 +638,12 @@ onUnmounted(() => {
 
 #google-signin-button {
   min-height: 40px;
+}
+
+/* Hide title on very small screens to prevent cramping */
+@media (max-width: 420px) {
+  .hidden-on-cramped {
+    display: none !important;
+  }
 }
 </style>

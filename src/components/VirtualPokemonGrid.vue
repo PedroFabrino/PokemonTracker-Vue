@@ -1,13 +1,9 @@
 <!-- Virtual Pokemon Grid that only renders visible cards -->
 <template>
-  <div class="pokemon-grid-container">
+  <div class="pokemon-grid-container px-2 sm:px-4 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="pokemonStore.isLoading" class="loading-grid">
-      <div
-        v-for="i in 16"
-        :key="`loading-${i}`"
-        class="loading-card"
-      />
+      <div v-for="i in 16" :key="`loading-${i}`" class="loading-card" />
     </div>
 
     <!-- Empty State -->
@@ -20,12 +16,7 @@
       <p class="text-center max-w-md">
         Try adjusting your search or filter criteria to find Pokemon.
       </p>
-      <button
-        @click="pokemonStore.clearFilters()"
-        class="btn-primary mt-4"
-      >
-        Clear Filters
-      </button>
+      <button @click="pokemonStore.clearFilters()" class="btn-primary mt-4">Clear Filters</button>
     </div>
 
     <!-- Pokemon Grid - All Pokemon at once -->
@@ -65,11 +56,11 @@ const allPages = computed(() => {
   const pokemon = filteredPokemon.value
   const pages = []
   const itemsPerPage = 16 // 4x4 grid
-  
+
   for (let i = 0; i < pokemon.length; i += itemsPerPage) {
     pages.push(pokemon.slice(i, i + itemsPerPage))
   }
-  
+
   return pages
 })
 
@@ -83,14 +74,14 @@ const scrollToPage = (pageNumber: number) => {
 
     window.scrollTo({
       top: offsetPosition,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   }
 }
 
 // Expose scrollToPage for parent components
 defineExpose({
-  scrollToPage
+  scrollToPage,
 })
 </script>
 
